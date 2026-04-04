@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="page-header">
+    <h2>Welcome to the Administrator Dashboard</h2>
+    <p>Manage your students and courses effortlessly.</p>
+</header>
+
+<div class="grid-layout">
+    <!-- Students Section -->
+    <section class="glass-card">
+        <div class="card-header">
+            <h3>Registered Students</h3>
+            <span class="badge">{{ students|length }} total</span>
+        </div>
+        <ul class="data-list">
+            {% for student in students %}
+            <li class="data-item">
+                <div class="info">
+                    <strong>{{ student.name }}</strong>
+                    <span class="gpa">GPA: {{ student.gpa }}</span>
+                </div>
+                <div class="details">
+                    <small>{{ student.courses|length }} courses enrolled</small>
+                </div>
+            </li>
+            {% else %}
+            <li class="empty-state">No students found. Add one via the API.</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <!-- Courses Section -->
+    <section class="glass-card">
+        <div class="card-header">
+            <h3>Active Courses</h3>
+            <span class="badge">{{ courses|length }} modules</span>
+        </div>
+        <ul class="data-list">
+            {% for course in courses %}
+            <li class="data-item course-item">
+                <div class="info">
+                    <strong>{{ course.name }}</strong>
+                </div>
+                <div class="details credits">
+                    <span>{{ course.credits }} Credits</span>
+                </div>
+            </li>
+            {% else %}
+            <li class="empty-state">No courses currently available.</li>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+{% endblock %}

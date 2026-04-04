@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container glass-card mx-auto" style="max-width: 400px;">
+    <h2>Authentication</h2>
+    <p>Sign in to access your dashboard.</p>
+    
+    <form id="loginForm" class="auth-form mt-4">
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="input-group mt-3">
+            <label>Password</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="btn primary mt-4 w-full">Secure Login</button>
+        <div id="loginError" class="error-msg mt-2"></div>
+    </form>
+    
+    <p class="mt-4"><a href="/register">Need an account? Register here.</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="page-header mt-4">
+    <h2>Student Dashboard</h2>
+    <p>Welcome back, <span id="student-name-display" class="highlight"></span>!</p>
+</header>
+
+<div class="grid-layout">
+    <section class="glass-card">
+        <div class="card-header">
+            <h3>My Details</h3>
+        </div>
+        <div id="my-profile-panel">
+            <p><strong>GPA:</strong> <span id="my-gpa"></span></p>
+            <p><strong>Enrolled Courses:</strong> <span id="my-courses-count"></span></p>
+        </div>
+    </section>
+
+    <section class="glass-card">
+        <div class="card-header">
+            <h3>Course Catalog</h3>
+        </div>
+        <ul class="data-list" id="available-courses-list">
+            <!-- Populated via JS -->
+        </ul>
+    </section>
+
+    <section class="glass-card" style="grid-column: 1 / -1;">
+        <div class="card-header">
+            <h3>My Schedule</h3>
+        </div>
+        <ul class="data-list" id="my-schedule-list">
+             <!-- Populated via JS -->
+        </ul>
+    </section>
+</div>
+{% endblock %}

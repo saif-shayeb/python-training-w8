@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="page-header mt-4">
+    <h2>Course Focus</h2>
+    <p>Detailed view of curriculum and enrollment</p>
+</header>
+
+<div class="grid-layout">
+    <section class="glass-card">
+        <div class="card-header">
+            <h3><span id="c-name" class="highlight">Loading...</span></h3>
+            <span class="badge" id="c-credits"></span>
+        </div>
+        
+        <div class="mt-4">
+            <h4>Enrolled Students (<span id="c-student-count">0</span>)</h4>
+            <ul class="data-list mt-3" id="c-students-list">
+                <!-- Javascript populated -->
+            </ul>
+        </div>
+    </section>
+</div>
+{% endblock %}

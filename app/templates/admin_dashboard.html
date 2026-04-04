@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="page-header mt-4">
+    <h2>Admin Dashboard</h2>
+    <p>Complete control over Student and Course Endpoints</p>
+</header>
+
+<div class="grid-layout">
+    <section class="glass-card">
+        <div class="card-header">
+            <h3>Add New Course</h3>
+        </div>
+        <form id="createCourseForm" class="auth-form flex gap-3">
+            <input type="text" id="new-c-name" placeholder="Course Name" required>
+            <input type="number" id="new-c-credits" placeholder="Credits" required>
+            <button class="btn accent">Create</button>
+        </form>
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.1)"/>
+        
+        <div class="card-header">
+            <h3>Manage Courses</h3>
+        </div>
+        <ul class="data-list" id="admin-courses-list"></ul>
+    </section>
+
+    <section class="glass-card">
+        <div class="card-header">
+            <h3>Manage Students</h3>
+        </div>
+        <ul class="data-list" id="admin-students-list"></ul>
+    </section>
+    
+    <!-- Custom Enrollment Link Module -->
+    <section class="glass-card" style="grid-column: 1 / -1;">
+        <div class="card-header">
+            <h3>Enroll Student into Course</h3>
+        </div>
+        <form id="enrollmentForm" class="auth-form flex gap-3" style="flex-direction:row;">
+            <select id="enroll-student-id" class="w-full" required>
+                <option value="">-- Select Student --</option>
+            </select>
+            <select id="enroll-course-id" class="w-full" required>
+                <option value="">-- Select Course --</option>
+            </select>
+            <button class="btn success w-full">Commit Enrollment</button>
+        </form>
+    </section>
+</div>
+
+<!-- Modal for Updating Student -->
+<div id="updateStudentModal" class="modal" style="display:none;">
+    <div class="glass-card modal-content">
+        <h3>Update Student #<span id="u-student-id"></span></h3>
+        <input type="text" id="u-student-name" class="mt-3 w-full" placeholder="Name">
+        <input type="number" step="0.1" id="u-student-gpa" class="mt-3 w-full" placeholder="GPA">
+        <div class="mt-4 flex gap-3">
+            <button onclick="submitStudentUpdate()" class="btn success w-full">Save Changes</button>
+            <button onclick="document.getElementById('updateStudentModal').style.display='none'" class="btn w-full">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
