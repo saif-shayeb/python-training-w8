@@ -17,8 +17,15 @@ Built during Week 8 of Python Training, this project seamlessly combines modern 
 
 > To pass your assignment, take a screenshot of your beautiful Jinja Dashboard and of a successful Postman API call, and paste them here!
 
-![Dashboard UI Placeholder](https://via.placeholder.com/800x400?text=Paste+your+Jinja+Dashboard+Screenshot+Here)
-![Postman Test Placeholder](https://via.placeholder.com/800x400?text=Paste+your+Postman+API+Test+Here)
+<img width="1919" height="955" alt="Screenshot 2026-04-05 021125" src="https://github.com/user-attachments/assets/3c47465b-5984-493a-bae6-19f105dbf21e" />
+<img width="1919" height="962" alt="image" src="https://github.com/user-attachments/assets/c9607054-cd91-4db0-8d13-60753dbc163c" />
+
+<img width="1919" height="955" alt="image" src="https://github.com/user-attachments/assets/a68c6115-fd02-48fb-b6d2-004990d54f19" />
+
+
+
+<img width="1919" height="978" alt="Screenshot 2026-04-04 223930" src="https://github.com/user-attachments/assets/e435fe87-7773-4d0e-b56a-3a55bf9c5170" />
+<img width="1919" height="1011" alt="Screenshot 2026-04-04 223946" src="https://github.com/user-attachments/assets/17b5cf0a-baa5-46bc-af07-6d23d04d73d5" />
 
 ---
 
