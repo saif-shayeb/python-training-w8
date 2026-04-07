@@ -22,6 +22,78 @@ Built during Week 8 of Python Training, this project seamlessly combines modern 
 
 ---
 
+## 🗄️ Database Schema
+
+The system is built on a relational SQLite database managed by SQLAlchemy.
+
+### Core Models
+- **User**: Stores authentication credentials.
+  - `id` (Integer, PK): Unique identifier.
+  - `username` (String): Unique login name.
+  - `password` (String): Securely hashed password.
+  - `role` (String): Role-based access control (`admin`, `student`, `instructor`).
+  - `email` (String): Primary contact email.
+- **Student**: profile linked to a User.
+  - `user_id` (FK): Links to `Users.id`.
+  - `name` (String): Full student name.
+  - `gpa` (Float): Academic performance metric.
+- **Instructor**: Profile linked to a User.
+  - `user_id` (FK): Links to `Users.id`.
+  - `name` (String): Instructor name.
+  - `major` (String): Department/Specialization.
+- **Course**: Academic offerings.
+  - `instructor_id` (FK): Links to `Instructors.id`.
+  - `name` (String): Title of the course.
+  - `credits` (Integer): Credit value.
+- **Enrollment** (Junction Table): Manages Many-to-Many relationship between Students and Courses.
+
+---
+
+## 🚀 API Documentation
+
+All API endpoints require a `JWT Bearer Token` in the `Authorization` header unless otherwise specified. Base URL: `/api`.
+
+### 🔐 Authentication (`/auth`)
+| Method | Endpoint | Payload | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/register` | `{username, password, role, email, ...}` | Create a new user and profile. |
+| `POST` | `/login` | `{username, password}` | Generate access token. |
+
+### 👨‍🎓 Students (`/students`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | Admin, Instructor | List all students (**Query params:** `q`, `page`, `per_page`). |
+| `GET` | `/me` | Student | Retrieve own profile data. |
+| `GET` | `/<id>` | Admin, Self | Get detailed student record. |
+| `PUT` | `/<id>` | Admin, Self | Update student information. |
+| `DELETE` | `/<id>` | Admin | Permanently remove student and associated user. |
+
+### 👨‍🏫 Instructors (`/instructors`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | All | List all instructors (**Query params:** `q`, `page`, `per_page`). |
+| `GET` | `/me` | Instructor | Retrieve own instructor profile. |
+| `GET` | `/<id>` | All | Get detailed instructor record. |
+| `POST` | `/` | Admin | Manually create instructor profile. |
+| `PUT` | `/<id>` | Admin | Update instructor specialization/major. |
+
+### 📚 Courses (`/courses`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | All | List all available courses (**Query params:** `q`, `page`, `per_page`). |
+| `GET` | `/<id>` | All | Get specific course details. |
+| `POST` | `/` | Admin | Add a new course to the catalog. |
+| `PUT` | `/<id>` | Admin | Update name, credits, or instructor. |
+| `DELETE` | `/<id>` | Admin | Archive/Remove course. |
+
+### 📝 Enrollments (`/enrollments`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/` | Admin, Student | Enroll student in a course (body: `{course_id, student_id?}`). |
+| `DELETE` | `/<sid>/<cid>` | Admin, Student | Remove student from a specific course. |
+
+---
+
 ## 🛠 Setup & Installation
 
 Follow these steps to boot the application up natively on your machine!

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Instructors - EduSpace{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Instructor Directory</h2>
+    <p>Complete directory of our academic staff</p>
+</div>
+
+<div class="glass-card mb-4">
+    <div class="flex gap-3">
+        <input type="text" id="instructor-search" placeholder="Search by instructor name..." class="w-full">
+        <button onclick="loadInstructorsList(1)" class="btn primary">Search</button>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="card-header">
+        <h3>Our Instructors</h3>
+        <span class="badge" id="instructor-total-count">0 Total</span>
+    </div>
+    <ul id="instructors-list-view" class="data-list">
+        <li class="empty-state">Loading instructors...</li>
+    </ul>
+    
+    <div id="instructor-pagination" class="pagination-container mt-4">
+        <!-- Pagination injected here -->
+    </div>
+</div>
+{% endblock %}

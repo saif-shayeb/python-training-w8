@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Students - EduSpace{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Student Directory</h2>
+    <p>Manage and view all enrolled students</p>
+</div>
+
+<div class="glass-card mb-4">
+    <div class="flex gap-3">
+        <input type="text" id="student-search" placeholder="Search by name..." class="w-full">
+        <button onclick="loadStudentsList(1)" class="btn primary">Search</button>
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="card-header">
+        <h3>Enrolled Students</h3>
+        <span class="badge" id="student-total-count">0 Total</span>
+    </div>
+    <ul id="students-list-view" class="data-list">
+        <li class="empty-state">Loading students...</li>
+    </ul>
+    
+    <div id="student-pagination" class="pagination-container mt-4">
+        <!-- Pagination injected here -->
+    </div>
+</div>
+{% endblock %}

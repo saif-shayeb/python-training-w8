@@ -1,0 +1,22 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}404 - Page Not Found{% endblock %}
+
+{% block content %}
+<div class="auth-card text-center" style="max-width: 500px;">
+    <div class="auth-header">
+        <h1 style="font-size: 72px; color: var(--primary); margin-bottom: 0;">404</h1>
+        <h2 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">Lost in the Digital Campus?</h2>
+        <p>The page you're looking for doesn't exist or has been moved to a different academic wing.</p>
+    </div>
+    
+    <div class="mt-4 flex flex-col gap-3">
+        <a href="/" class="btn btn-primary w-full shadow-lg">
+            <i class="fas fa-home"></i> Back to Safety
+        </a>
+        <button onclick="history.back()" class="btn btn-outline w-full">
+            <i class="fas fa-arrow-left"></i> Go Back
+        </button>
+    </div>
+</div>
+{% endblock %}

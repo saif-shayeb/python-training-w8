@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}My Learning Progress - EduSpace{% endblock %}
+{% block page_title %}Academic Course Summary{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">Enrolled Academic Records</div>
+        <a href="/student/catalog" class="btn btn-outline btn-sm"><i class="fas fa-plus"></i> View All Available Courses</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>identifier</th>
+                    <th>Course Title</th>
+                    <th>Lead Faculty</th>
+                    <th>Academic Credits</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="my-courses-body">
+                <tr><td colspan="6" style="text-align:center">Fetching your learning records...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (Auth.guard(['student'])) {
+        async function loadMyProfile() {
+            try {
+                const me = await Api.fetch('/students/me');
+                const tbody = document.getElementById('my-courses-body');
+                
+                if (me.courses.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No active enrollments detected on your academic profile.</td></tr>';
+                } else {
+                    tbody.innerHTML = me.courses.map(c => `
+                        <tr>
+                            <td>#CRS-${c.id}</td>
+                            <td style="font-weight:600">${c.name}</td>
+                            <td>${c.instructor ? 'Prof. ' + c.instructor.name : '<em>TBD</em>'}</td>
+                            <td><span class="badge badge-neutral">${c.credits} Hrs</span></td>
+                            <td><span class="badge badge-success">Attending</span></td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="/course/${c.id}" class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> Details</a>
+                                    <button class="btn btn-danger btn-sm" onclick="dropCourse(${me.id}, ${c.id})"><i class="fas fa-minus-circle"></i> Withdraw</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) { UI.toast(err.message, 'error'); }
+        }
+
+        window.dropCourse = async (studentId, courseId) => {
+            if (confirm('Are you sure you want to withdraw from this course catalog entry?')) {
+                try {
+                    await Api.fetch(`/enrollments/${studentId}/${courseId}`, { method: 'DELETE' });
+                    UI.toast('Withdrawal complete');
+                    loadMyProfile();
+                } catch (err) { UI.toast(err.message, 'error'); }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', loadMyProfile);
+    }
+</script>
+{% endblock %}

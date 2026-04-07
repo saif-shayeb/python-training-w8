@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Manage Instructors - EduSpace{% endblock %}
+{% block page_title %}Instructor Directory{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="instructor-search" class="form-control" placeholder="Search by name..." oninput="window.debouncedSearch()">
+        </div>
+        <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Academic Account</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Specialization / Major</th>
+                    <th>User Account</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="instructors-table-body">
+                <tr><td colspan="5" style="text-align:center">Loading data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-body" id="instructor-pagination"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (Auth.guard(['admin'])) {
+        window.debouncedSearch = UI.debounce(() => loadInstructors(1));
+
+        async function loadInstructors(page = 1) {
+            try {
+                const query = document.getElementById('instructor-search').value;
+                const data = await Api.fetch(`/instructors?page=${page}&q=${query}`);
+                
+                const tbody = document.getElementById('instructors-table-body');
+                if (data.instructors.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No instructors found.</td></tr>';
+                } else {
+                    tbody.innerHTML = data.instructors.map(i => `
+                        <tr>
+                            <td>#${i.id}</td>
+                            <td style="font-weight:500">${i.name}</td>
+                            <td><span class="badge badge-neutral">${i.major}</span></td>
+                            <td>User ID: ${i.user_id}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" onclick="deleteInstructor(${i.id})"><i class="fas fa-trash-alt"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                UI.pagination('instructor-pagination', data.pages, data.current_page, 'loadInstructors');
+            } catch (err) { UI.toast(err.message, 'error'); }
+        }
+
+        window.deleteInstructor = async (id) => {
+            if (confirm('Delete this instructor account? It may be linked to active courses.')) {
+                try {
+                    await Api.fetch(`/instructors/${id}`, { method: 'DELETE' });
+                    UI.toast('Instructor removed');
+                    loadInstructors();
+                } catch (err) { UI.toast(err.message, 'error'); }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => loadInstructors(1));
+    }
+</script>
+{% endblock %}

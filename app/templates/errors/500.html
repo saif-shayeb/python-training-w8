@@ -1,0 +1,26 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}500 - Server Error{% endblock %}
+
+{% block content %}
+<div class="auth-card text-center" style="max-width: 500px;">
+    <div class="auth-header">
+        <h1 style="font-size: 72px; color: var(--danger); margin-bottom: 0;">500</h1>
+        <h2 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">Technical Failure</h2>
+        <p>Something went wrong with our academic server. Our digital staff has been notified and is working on a solution.</p>
+    </div>
+    
+    <div class="mt-4 flex flex-col gap-3">
+        <a href="/" class="btn btn-primary w-full shadow-lg">
+            <i class="fas fa-redo"></i> Try Re-entering
+        </a>
+        <button onclick="location.reload()" class="btn btn-outline w-full">
+            <i class="fas fa-sync-alt"></i> Refresh Page
+        </button>
+    </div>
+    
+    <div class="mt-4" style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 11px; color: var(--text-muted); font-family: monospace; border: 1px dashed var(--border-color);">
+        Reference ID: {{ reference_id or "UNKNOWN_ERROR" }}
+    </div>
+</div>
+{% endblock %}

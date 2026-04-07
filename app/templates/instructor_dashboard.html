@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Instructor Dashboard - Student Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Instructor Dashboard</h2>
+    <p>Welcome back, Professor <span id="instructor-name-display">...</span></p>
+</div>
+
+<div class="grid-layout">
+    <!-- Profile & Overview -->
+    <div class="glass-card">
+        <div class="card-header">
+            <h3>Account Overview</h3>
+            <span class="badge" id="my-major">Major</span>
+        </div>
+        <div class="data-list">
+            <div class="data-item">
+                <span>Courses Teaching</span>
+                <span id="my-courses-count" class="badge">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Courses List -->
+    <div class="glass-card">
+        <div class="card-header">
+            <h3>My Courses</h3>
+        </div>
+        <ul id="my-teaching-list" class="data-list">
+            <li class="empty-state">Loading your courses...</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Extra Stats or quick actions could go here -->
+<div class="glass-card mt-4">
+    <div class="card-header">
+        <h3>Teaching Statistics</h3>
+    </div>
+    <div style="display:flex; gap:20px; justify-content:space-around; padding:1rem;">
+        <div style="text-align:center;">
+            <div style="font-size:2rem; font-weight:800; color:var(--accent);">Active</div>
+            <div class="text-muted">Status</div>
+        </div>
+        <div style="text-align:center;">
+            <div style="font-size:2rem; font-weight:800; color:var(--success);">Verified</div>
+            <div class="text-muted">Account</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

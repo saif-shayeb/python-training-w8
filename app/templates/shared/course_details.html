@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Course Overview - EduSpace{% endblock %}
+{% block page_title %}Academic Syllabus Detail{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header items-center">
+        <h2 class="card-title" id="course-name">Course Title</h2>
+        <span class="badge badge-neutral" id="course-credits">0 Credits</span>
+    </div>
+    <div class="card-body">
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-4 p-4 border-color rounded-12 mt-2" style="background: #f9fafb;">
+                <div class="avatar" style="width: 50px; height: 50px; font-size: 20px;"><i class="fas fa-chalkboard-teacher"></i></div>
+                <div>
+                    <h4 style="font-weight: 600;">Faculty Advisor</h4>
+                    <p id="course-instructor" class="text-muted">Loading instructor...</p>
+                </div>
+            </div>
+
+            <div id="student-roster-section" class="mt-4" style="display: none;">
+                <h4 style="font-weight: 600; margin-bottom: 12px;">Enrolled Student Roster</h4>
+                <div class="table-responsive card" style="box-shadow: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Account status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-roster">
+                            <tr><td colspan="2" style="text-align:center">Fetching attendee list...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const courseId = {{ course_id }};
+    
+    async function loadCourse() {
+        const role = localStorage.getItem('user_role');
+        try {
+            const course = await Api.fetch(`/courses/${courseId}`);
+            document.getElementById('course-name').innerText = course.name;
+            document.getElementById('course-credits').innerText = `${course.credits} Academic Credits`;
+            document.getElementById('course-instructor').innerText = course.instructor ? course.instructor.name : 'Unassigned';
+            
+            if (role !== 'student') {
+                const rosterSection = document.getElementById('student-roster-section');
+                if (rosterSection) {
+                    rosterSection.style.display = 'block';
+                    const roster = document.getElementById('student-roster');
+                    if (course.students.length === 0) {
+                        roster.innerHTML = '<tr><td colspan="2" style="text-align:center">No students enrolled yet.</td></tr>';
+                    } else {
+                        roster.innerHTML = course.students.map(s => `
+                            <tr>
+                                <td style="font-weight: 500">${s.name}</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            }
+        } catch (err) { UI.toast(err.message, 'error'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCourse);
+</script>
+{% endblock %}

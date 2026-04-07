@@ -3,32 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}EduSpace{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>{% block title %}EduSpace Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">
-            <span class="icon">🎓</span>
-            <h1>EduSpace</h1>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-graduation-cap"></i> EduSpace
+            </div>
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <!-- Injected via app.js -->
+            </nav>
+            <div style="padding: 24px;">
+                <button id="logout-btn" class="btn btn-outline w-full" style="color: var(--sidebar-text); border-color: rgba(255,255,255,0.1)">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="topbar">
+                <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                <div class="topbar-actions">
+                    <div class="user-profile" onclick="UI.modal.open('profilePicModal')">
+                        <div class="avatar">
+                            <img id="topbar-avatar-img" src="" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none;">
+                            <i id="topbar-avatar-icon" class="fas fa-user"></i>
+                        </div>
+                        <span id="topbar-user-name">User</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-wrapper">
+                {% block content %}{% endblock %}
+            </main>
         </div>
-        <ul class="nav-links" id="nav-menu">
-            <!-- Dynamically injected via JavaScript -->
-        </ul>
-    </nav>
-    
-    <!-- Global UI Flash Feedback Container -->
-    <div id="flash-container" class="flash-container"></div>
+    </div>
 
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+    <!-- Global Modals -->
+    <div id="updateStudentModal" class="modal-overlay">
+        <div class="modal-wrapper">
+            <div class="modal-header">
+                <div class="modal-title">Update Student #<span id="u-student-id"></span></div>
+                <button class="modal-close" onclick="UI.modal.close('updateStudentModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="u-student-name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">GPA</label>
+                    <input type="number" step="0.1" id="u-student-gpa" class="form-control">
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="submitStudentUpdate()" class="btn btn-primary w-full">Save Changes</button>
+                    <button onclick="UI.modal.close('updateStudentModal')" class="btn btn-outline w-full">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
-    <script>
-        // Mount authentication UI changes globally
-        document.addEventListener('DOMContentLoaded', updateNavigation);
-    </script>
+    <!-- Profile Picture Modal -->
+    <div id="profilePicModal" class="modal-overlay">
+        <div class="modal-wrapper" style="max-width: 400px;">
+            <div class="modal-header">
+                <div class="modal-title">Profile Picture</div>
+                <button class="modal-close" onclick="UI.modal.close('profilePicModal')">&times;</button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="flex flex-col items-center gap-4">
+                    <div class="avatar-large" style="width: 120px; height: 120px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 4px solid var(--border-color);">
+                        <img id="modal-avatar-preview" src="" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <i id="modal-avatar-icon" class="fas fa-user fa-4x" style="color: white;"></i>
+                    </div>
+                    
+                    <div class="form-group w-full">
+                        <label class="btn btn-outline w-full" for="profile-pic-input">
+                            <i class="fas fa-upload"></i> Select Image
+                        </label>
+                        <input type="file" id="profile-pic-input" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                        <p id="selected-file-name" class="mt-2 text-muted" style="font-size: 12px;"></p>
+                    </div>
+
+                    <button id="upload-pic-btn" onclick="uploadProfilePic()" class="btn btn-primary w-full" disabled>
+                        Upload New Picture
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

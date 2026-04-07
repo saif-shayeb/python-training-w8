@@ -8,9 +8,11 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 Base = declarative_base()
 Base.query = db_session.query_property()
 
+
 def init_db():
-    import app.models.user
-    import app.models.courses
-    import app.models.enrollment
-    import app.models.student
+    __import__("app.models.user")
+    __import__("app.models.courses")
+    __import__("app.models.enrollment")
+    __import__("app.models.student")
+    __import__("app.models.instructor")
     Base.metadata.create_all(bind=engine)

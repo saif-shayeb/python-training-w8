@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}My Courses - Faculty Hub{% endblock %}
+{% block page_title %}Teaching Catalog{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">Assigned Course Records</div>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="course-search" class="form-control" placeholder="Filter courses..."
+                onkeyup="searchCourses()">
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Identifier</th>
+                    <th>Course Title</th>
+                    <th>Student Roster</th>
+                    <th>Action Hub</th>
+                </tr>
+            </thead>
+            <tbody id="instructor-courses-body">
+                <tr>
+                    <td colspan="4" style="text-align:center">Retreiving faculty course assignments...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (Auth.guard(['instructor'])) {
+        let allMyCourses = [];
+
+        async function loadInstructing() {
+            try {
+                const me = await Api.fetch('/instructors/me');
+                allMyCourses = me.courses;
+                renderCourses(allMyCourses);
+            } catch (err) { UI.toast(err.message, 'error'); }
+        }
+
+        function renderCourses(courses) {
+            const tbody = document.getElementById('instructor-courses-body');
+            if (courses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No matching courses found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = courses.map(c => `
+                <tr>
+                    <td>#CRS-${c.id}</td>
+                    <td style="font-weight:600">${c.name}</td>
+                    <td>
+                        <div class="avatar-group flex items-center gap-2">
+                            <span class="badge badge-success">${c.students.length} Enrolled</span>
+                            <small class="text-muted">ID: ${c.id}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="/course/${c.id}" class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View details</a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.searchCourses = () => {
+            const q = document.getElementById('course-search').value.toLowerCase();
+            const filtered = allMyCourses.filter(c => c.name.toLowerCase().includes(q));
+            renderCourses(filtered);
+        };
+
+        document.addEventListener('DOMContentLoaded', loadInstructing);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Course Catalog - EduSpace{% endblock %}
+{% block page_title %}Explore Curriculum{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="search-bar" style="width: 100%; max-width: 400px;">
+            <i class="fas fa-search"></i>
+            <input type="text" id="course-search" class="form-control" placeholder="Search by course name..." oninput="window.debouncedSearch()">
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Course Title</th>
+                    <th>instructor</th>
+                    <th>Credits</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="catalog-body">
+                <tr><td colspan="5" style="text-align:center">Loading course catalog...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-body" id="catalog-pagination"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (Auth.guard(['student'])) {
+        window.debouncedSearch = UI.debounce(() => loadCatalog(1));
+        let myCourseIds = [];
+
+        async function loadCatalog(page = 1) {
+            try {
+                // First get my courses to show enrollment status
+                const me = await Api.fetch('/students/me');
+                myCourseIds = me.courses.map(c => c.id);
+
+                const query = document.getElementById('course-search').value;
+                const data = await Api.fetch(`/courses?page=${page}&q=${query}`);
+                
+                const tbody = document.getElementById('catalog-body');
+                if (data.courses.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No courses found matching your query.</td></tr>';
+                } else {
+                    tbody.innerHTML = data.courses.map(c => {
+                        const isEnrolled = myCourseIds.includes(c.id);
+                        return `
+                            <tr>
+                                <td>#CRS-${c.id}</td>
+                                <td style="font-weight:600">${c.name}</td>
+                                <td>${c.instructor ? 'Prof. ' + c.instructor.name : '<em>TBD</em>'}</td>
+                                <td><span class="badge badge-neutral">${c.credits} Cr</span></td>
+                                <td>
+                                    ${isEnrolled 
+                                        ? `<button class="btn btn-danger btn-sm" onclick="dropCourse(${c.id})"><i class="fas fa-minus-circle"></i> Drop</button>` 
+                                        : `<button class="btn btn-primary btn-sm" onclick="enrollInCourse(${c.id})"><i class="fas fa-plus-circle"></i> Enroll</button>`}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+                UI.pagination('catalog-pagination', data.pages, data.current_page, 'loadCatalog');
+            } catch (err) { UI.toast(err.message, 'error'); }
+        }
+
+        window.enrollInCourse = async (courseId) => {
+            try {
+                await Api.fetch('/enrollments', {
+                    method: 'POST',
+                    body: JSON.stringify({ course_id: courseId })
+                });
+                UI.toast('Successfully enrolled!');
+                loadCatalog();
+            } catch (err) { UI.toast(err.message, 'error'); }
+        };
+
+        window.dropCourse = async (courseId) => {
+            if (confirm('Are you sure you want to drop this course?')) {
+                try {
+                    // We need the student ID for the drop endpoint
+                    const me = await Api.fetch('/students/me');
+                    await Api.fetch(`/enrollments/${me.id}/${courseId}`, { method: 'DELETE' });
+                    UI.toast('Course dropped');
+                    loadCatalog();
+                } catch (err) { UI.toast(err.message, 'error'); }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => loadCatalog(1));
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}My Student Portal - EduSpace{% endblock %}
+{% block page_title %}Academic Home{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-title">Current GPA</div>
+        <div class="stat-value" id="stats-gpa">0.0</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Credits Enrolled</div>
+        <div class="stat-value" id="stats-credits">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Course Load</div>
+        <div class="stat-value" id="stats-courses">0</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">Enrolled Schedule</div>
+        <a href="/student/catalog" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Enroll in Courses</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>identifier</th>
+                    <th>Course Name</th>
+                    <th>Instructor Name</th>
+                    <th>Hours</th>
+                </tr>
+            </thead>
+            <tbody id="student-schedule">
+                <tr><td colspan="4" style="text-align:center">Getting records...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (Auth.guard(['student'])) {
+        async function loadProfile() {
+            try {
+                const me = await Api.fetch('/students/me');
+                document.getElementById('stats-gpa').innerText = me.gpa.toFixed(1);
+                
+                let credits = 0;
+                me.courses.forEach(c => credits += c.credits);
+                document.getElementById('stats-credits').innerText = credits;
+                document.getElementById('stats-courses').innerText = me.courses.length;
+                
+                const list = document.getElementById('student-schedule');
+                if (me.courses.length === 0) {
+                    list.innerHTML = '<tr><td colspan="4" style="text-align:center">No courses currently enrolled.</td></tr>';
+                } else {
+                    list.innerHTML = me.courses.map(c => `
+                        <tr>
+                            <td>#CRS-${c.id}</td>
+                            <td style="font-weight:600">${c.name}</td>
+                            <td>${c.instructor ? 'Prof. ' + c.instructor.name : '<em>Pending assignments</em>'}</td>
+                            <td><span class="badge badge-neutral">${c.credits} Cr</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) { UI.toast(err.message, 'error'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - EduSpace{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-title">Total Students Enrolled</div>
+        <div class="stat-value" id="stats-students">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Active Faculty</div>
+        <div class="stat-value" id="stats-instructors">0</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Course Catalog Size</div>
+        <div class="stat-value" id="stats-courses">0</div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="card-title">Administrative Quick Actions</div>
+    </div>
+    <div class="card-body flex gap-3" style="flex-wrap: wrap;">
+        <a href="/admin/students" class="btn btn-outline btn-sm"><i class="fas fa-user-graduate"></i> Manage Students</a>
+        <a href="/admin/instructors" class="btn btn-outline btn-sm"><i class="fas fa-chalkboard-teacher"></i> Manage Instructors</a>
+        <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Create Academic User Account</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="card-title">Pending Account Approvals</div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="pending-users-list">
+                <tr><td colspan="5" style="text-align:center">Loading pending approvals...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (Auth.guard(['admin'])) {
+        async function loadDashboard() {
+            try {
+                // Fetch stats sizes (using paginated calls with small limit just to get totals)
+                const [students, instructors, courses] = await Promise.all([
+                    Api.fetch('/students?per_page=1'),
+                    Api.fetch('/instructors?per_page=1'),
+                    Api.fetch('/courses?per_page=100') // We get more courses to populate dropdown
+                ]);
+
+                document.getElementById('stats-students').innerText = students.total;
+                document.getElementById('stats-instructors').innerText = instructors.total;
+                document.getElementById('stats-courses').innerText = courses.total;
+            } catch (err) { UI.toast('Failed to load dashboard data', 'error'); }
+            
+            loadPendingUsers();
+        }
+
+        async function loadPendingUsers() {
+            try {
+                const users = await Api.fetch('/users/pending');
+                const list = document.getElementById('pending-users-list');
+                
+                if (users.length === 0) {
+                    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">No pending accounts waiting for approval.</td></tr>';
+                    return;
+                }
+
+                list.innerHTML = users.map(u => `
+                    <tr id="pending-user-${u.id}">
+                        <td style="font-weight: 500">${u.username}</td>
+                        <td>${u.email}</td>
+                        <td>${u.name || '-'}</td>
+                        <td><span class="badge ${u.role === 'instructor' ? 'badge-neutral' : 'badge-success'}">${u.role.toUpperCase()}</span></td>
+                        <td>
+                            <button onclick="approveUser(${u.id})" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Approve</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                UI.toast('Failed to load pending users', 'error');
+            }
+        }
+
+        window.approveUser = async function(userId) {
+            try {
+                await Api.fetch(`/users/${userId}/approve`, { method: 'POST' });
+                UI.toast('User approved successfully', 'success');
+                const row = document.getElementById(`pending-user-${userId}`);
+                if (row) row.remove();
+                
+                // If table is now empty
+                const list = document.getElementById('pending-users-list');
+                if (list.children.length === 0) {
+                    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">No pending accounts waiting for approval.</td></tr>';
+                }
+            } catch (err) {
+                UI.toast(err.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    }
+</script>
+{% endblock %}
