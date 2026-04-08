@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from app.models.courses import Course
 from app.models.instructor import Instructor
 from app.models.student import Student
@@ -6,11 +11,7 @@ from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash
 from database import Base, db_session, engine
 from app import create_app
-import os
-import sys
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 @pytest.fixture(scope="session")
