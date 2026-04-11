@@ -99,11 +99,31 @@ button { cursor: pointer; font-family: inherit; }
 .badge-neutral { background: #f3f4f6; color: var(--text-muted); border: 1px solid var(--border-color); }
 
 /* Pagination */
-.pagination { display: flex; align-items: center; gap: 4px; margin-top: 20px; justify-content: flex-end; }
-.page-item { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-color); background: white; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-main); }
-.page-item:hover { background: #f3f4f6; }
-.page-item.active { background: var(--primary); color: white; border-color: var(--primary); }
-.page-item:disabled { opacity: 0.5; cursor: not-allowed; }
+.pagination .page-link {
+  color: var(--primary);
+  border-color: var(--border-color);
+}
+.pagination .page-item.active .page-link {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.pagination .page-item.disabled .page-link {
+  color: var(--text-muted);
+}
+
+.list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.list-toolbar .search-input {
+  min-width: 260px;
+  max-width: 420px;
+}
 
 /* Public Pages Shell */
 .public-shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-main); }

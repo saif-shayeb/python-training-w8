@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, abort
 from werkzeug.exceptions import HTTPException
 from app.models.instructor import Instructor
+from app.models.courses import Course
 from app.models.user import User
 from database import db_session
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -67,6 +68,50 @@ def get_my_profile():
                      }),
             200,
             )
+
+
+@instructor_bp.route("/me/courses", methods=["GET"])
+@jwt_required()
+@role_required("instructor")
+def get_my_courses():
+    user_id = get_jwt_identity()
+    instructor = Instructor.query.filter_by(user_id=user_id).first()
+    if not instructor:
+        abort(404, description="Instructor profile not found")
+
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 8, type=int)
+    search_query = request.args.get("q", "", type=str).strip()
+
+    query = Course.query.filter_by(instructor_id=instructor.id)
+    if search_query:
+        query = query.filter(Course.name.ilike(f"%{search_query}%"))
+
+    total = query.count()
+    import math
+    total_pages = math.ceil(total / per_page) if per_page > 0 else 0
+
+    courses = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    return (
+        jsonify(
+            {
+                "courses": [
+                    {
+                        "id": c.id,
+                        "name": c.name,
+                        "credits": c.credits,
+                        "students": [{"id": s.id} for s in c.students],
+                    }
+                    for c in courses
+                ],
+                "total": total,
+                "pages": total_pages,
+                "current_page": page,
+            }
+        ),
+        200,
+    )
 
 
 @instructor_bp.route("/<int:instructor_id>", methods=["GET"])

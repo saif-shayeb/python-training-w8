@@ -3,16 +3,23 @@
 {% block page_title %}Student Directory{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="student-search" class="form-control" placeholder="Search by name..." oninput="window.debouncedSearch()">
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <div class="list-toolbar">
+            <div class="input-group search-input">
+                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                <input type="text" id="student-search" class="form-control" placeholder="Search by name..." oninput="window.debouncedSearch()">
+            </div>
+            <span id="student-total-count" class="badge text-bg-light border">0 students</span>
         </div>
-        <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Academic Account</a>
+    </div>
+    <div class="card-header bg-white border-top-0 pt-0 pb-3">
+        <div class="d-flex justify-content-end">
+            <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Academic Account</a>
+        </div>
     </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -27,7 +34,7 @@
             </tbody>
         </table>
     </div>
-    <div class="card-body" id="student-pagination"></div>
+    <div class="card-footer bg-white" id="student-pagination"></div>
 </div>
 {% endblock %}
 
@@ -38,12 +45,13 @@
 
         async function loadStudents(page = 1) {
             try {
-                const query = document.getElementById('student-search').value;
-                const data = await Api.fetch(`/students?page=${page}&q=${query}`);
+                const query = encodeURIComponent(document.getElementById('student-search').value.trim());
+                const data = await Api.fetch(`/students?page=${page}&per_page=8&q=${query}`);
                 
                 const tbody = document.getElementById('students-table-body');
+                document.getElementById('student-total-count').innerText = `${data.total} students`;
                 if (data.students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No students found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No students found.</td></tr>';
                 } else {
                     tbody.innerHTML = data.students.map(s => `
                         <tr>
@@ -60,7 +68,7 @@
                         </tr>
                     `).join('');
                 }
-                UI.pagination('student-pagination', data.pages, data.current_page, 'loadStudents');
+                UI.pagination('student-pagination', data.pages, data.current_page, loadStudents);
             } catch (err) { UI.toast(err.message, 'error'); }
         }
 

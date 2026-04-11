@@ -4,27 +4,27 @@
 
 {% block content %}
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card shadow-sm border-0">
         <div class="stat-title">Current GPA</div>
         <div class="stat-value" id="stats-gpa">0.0</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card shadow-sm border-0">
         <div class="stat-title">Credits Enrolled</div>
         <div class="stat-value" id="stats-credits">0</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card shadow-sm border-0">
         <div class="stat-title">Course Load</div>
         <div class="stat-value" id="stats-courses">0</div>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white">
         <div class="card-title">Enrolled Schedule</div>
         <a href="/student/catalog" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Enroll in Courses</a>
     </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>identifier</th>
@@ -56,7 +56,7 @@
                 
                 const list = document.getElementById('student-schedule');
                 if (me.courses.length === 0) {
-                    list.innerHTML = '<tr><td colspan="4" style="text-align:center">No courses currently enrolled.</td></tr>';
+                    list.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No courses currently enrolled.</td></tr>';
                 } else {
                     list.innerHTML = me.courses.map(c => `
                         <tr>

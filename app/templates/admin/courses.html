@@ -4,16 +4,19 @@
 
 {% block content %}
 <div class="stats-grid">
-    <div class="card" style="grid-column: span 2;">
-        <div class="card-header">
-            <div class="card-title">Curriculum List</div>
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" id="course-search" class="form-control" placeholder="Search courses..." oninput="window.debouncedSearch()">
+    <div class="card shadow-sm border-0" style="grid-column: span 2;">
+        <div class="card-header bg-white py-3">
+            <div class="list-toolbar w-100">
+                <div class="card-title mb-0">Curriculum List</div>
+                <div class="input-group search-input">
+                    <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                    <input type="text" id="course-search" class="form-control" placeholder="Search courses..." oninput="window.debouncedSearch()">
+                </div>
+                <span id="course-total-count" class="badge text-bg-light border">0 courses</span>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Course Code</th>
@@ -28,11 +31,11 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-body" id="course-pagination"></div>
+        <div class="card-footer bg-white" id="course-pagination"></div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white">
             <div class="card-title">New Course Entry</div>
         </div>
         <div class="card-body">
@@ -67,12 +70,13 @@
 
         async function loadCourses(page = 1) {
             try {
-                const query = document.getElementById('course-search').value;
-                const data = await Api.fetch(`/courses?page=${page}&q=${query}`);
+                const query = encodeURIComponent(document.getElementById('course-search').value.trim());
+                const data = await Api.fetch(`/courses?page=${page}&per_page=8&q=${query}`);
                 
                 const tbody = document.getElementById('courses-table-body');
+                document.getElementById('course-total-count').innerText = `${data.total} courses`;
                 if (data.courses.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Catalog is currently empty.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Catalog is currently empty.</td></tr>';
                 } else {
                     tbody.innerHTML = data.courses.map(c => `
                         <tr>
@@ -86,7 +90,7 @@
                         </tr>
                     `).join('');
                 }
-                UI.pagination('course-pagination', data.pages, data.current_page, 'loadCourses');
+                UI.pagination('course-pagination', data.pages, data.current_page, loadCourses);
             } catch (err) { UI.toast(err.message, 'error'); }
         }
 

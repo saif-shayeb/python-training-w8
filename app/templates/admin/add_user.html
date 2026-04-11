@@ -3,8 +3,8 @@
 {% block page_title %}Administrative User Creation{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 600px; margin: 0 auto;">
-    <div class="card-header">
+<div class="card shadow-sm border-0 mx-auto" style="max-width: 680px;">
+    <div class="card-header bg-white">
         <div class="card-title">New User Account Details</div>
     </div>
     <div class="card-body">
@@ -34,7 +34,7 @@
             </div>
 
             <!-- Role-specific extra fields -->
-            <div id="role-fields" style="background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 24px;">
+            <div id="role-fields" class="rounded border mt-4 p-4" style="background: #f9fafb; border-color: var(--border-color) !important;">
                 <div class="form-group">
                     <label class="form-label" id="field-name-label">Student Full Name</label>
                     <input type="text" id="add-name" class="form-control" required>
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <div class="flex gap-4 mt-4">
+            <div class="d-flex gap-3 mt-4">
                 <button type="submit" class="btn btn-primary w-full" id="submit-btn">
                     <i class="fas fa-user-plus"></i> Finalize Account Profile
                 </button>

@@ -43,30 +43,75 @@ const UI = {
         setTimeout(() => { if (toast.parentElement) toast.remove(); }, 4000);
     },
     
-    pagination(containerId, totalPages, currentPage, callbackName) {
+    pagination(containerId, totalPages, currentPage, callback) {
         const container = document.getElementById(containerId);
         if (!container) return;
+
+        const callbackFn = typeof callback === 'function' ? callback : window[callback];
+        if (typeof callbackFn !== 'function') {
+            container.innerHTML = '';
+            console.error('Pagination callback is not callable:', callback);
+            return;
+        }
         
         if (totalPages <= 1) {
             container.innerHTML = '';
             return;
         }
-        
-        let html = '<div class="pagination">';
-        html += `<button class="page-item" ${currentPage === 1 ? 'disabled' : ''} onclick="${callbackName}(${currentPage - 1})">&lt;</button>`;
-        
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                html += `<button class="page-item ${i === currentPage ? 'active' : ''}" onclick="${callbackName}(${i})">${i}</button>`;
-            } else if (i === currentPage - 2 || i === currentPage + 2) {
-                html += `<span style="padding: 0 4px">...</span>`;
+
+        const windowStart = Math.max(1, currentPage - 1);
+        const windowEnd = Math.min(totalPages, currentPage + 1);
+
+        let html = '<nav aria-label="List pagination"><ul class="pagination justify-content-end mb-0">';
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <button type="button" class="page-link" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''} aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </button>
+            </li>
+        `;
+
+        if (windowStart > 1) {
+            html += `<li class="page-item"><button type="button" class="page-link" data-page="1">1</button></li>`;
+            if (windowStart > 2) {
+                html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
             }
         }
-        
-        html += `<button class="page-item" ${currentPage === totalPages ? 'disabled' : ''} onclick="${callbackName}(${currentPage + 1})">&gt;</button>`;
-        html += '</div>';
+
+        for (let i = windowStart; i <= windowEnd; i++) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <button type="button" class="page-link" data-page="${i}">${i}</button>
+                </li>
+            `;
+        }
+
+        if (windowEnd < totalPages) {
+            if (windowEnd < totalPages - 1) {
+                html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            html += `<li class="page-item"><button type="button" class="page-link" data-page="${totalPages}">${totalPages}</button></li>`;
+        }
+
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <button type="button" class="page-link" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </button>
+            </li>
+        `;
+        html += '</ul></nav>';
         
         container.innerHTML = html;
+
+        container.querySelectorAll('button[data-page]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+                const nextPage = parseInt(btn.dataset.page, 10);
+                if (Number.isNaN(nextPage)) return;
+                callbackFn(nextPage);
+            });
+        });
     },
 
     modal: {

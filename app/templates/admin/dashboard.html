@@ -4,37 +4,37 @@
 
 {% block content %}
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card shadow-sm border-0">
         <div class="stat-title">Total Students Enrolled</div>
         <div class="stat-value" id="stats-students">0</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card shadow-sm border-0">
         <div class="stat-title">Active Faculty</div>
         <div class="stat-value" id="stats-instructors">0</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card shadow-sm border-0">
         <div class="stat-title">Course Catalog Size</div>
         <div class="stat-value" id="stats-courses">0</div>
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-white">
         <div class="card-title">Administrative Quick Actions</div>
     </div>
-    <div class="card-body flex gap-3" style="flex-wrap: wrap;">
+    <div class="card-body d-flex gap-3 flex-wrap">
         <a href="/admin/students" class="btn btn-outline btn-sm"><i class="fas fa-user-graduate"></i> Manage Students</a>
         <a href="/admin/instructors" class="btn btn-outline btn-sm"><i class="fas fa-chalkboard-teacher"></i> Manage Instructors</a>
         <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Create Academic User Account</a>
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-white">
         <div class="card-title">Pending Account Approvals</div>
     </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Username</th>
@@ -78,7 +78,7 @@
                 const list = document.getElementById('pending-users-list');
                 
                 if (users.length === 0) {
-                    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">No pending accounts waiting for approval.</td></tr>';
+                    list.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No pending accounts waiting for approval.</td></tr>';
                     return;
                 }
 
@@ -108,7 +108,7 @@
                 // If table is now empty
                 const list = document.getElementById('pending-users-list');
                 if (list.children.length === 0) {
-                    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted)">No pending accounts waiting for approval.</td></tr>';
+                    list.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No pending accounts waiting for approval.</td></tr>';
                 }
             } catch (err) {
                 UI.toast(err.message, 'error');

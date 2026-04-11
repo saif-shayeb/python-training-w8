@@ -3,13 +3,13 @@
 {% block page_title %}Academic Course Summary{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white">
         <div class="card-title">Enrolled Academic Records</div>
         <a href="/student/catalog" class="btn btn-outline btn-sm"><i class="fas fa-plus"></i> View All Available Courses</a>
     </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>identifier</th>
@@ -37,7 +37,7 @@
                 const tbody = document.getElementById('my-courses-body');
                 
                 if (me.courses.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No active enrollments detected on your academic profile.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No active enrollments detected on your academic profile.</td></tr>';
                 } else {
                     tbody.innerHTML = me.courses.map(c => `
                         <tr>

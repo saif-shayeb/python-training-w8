@@ -3,17 +3,19 @@
 {% block page_title %}Teaching Catalog{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <div class="card-title">Assigned Course Records</div>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="course-search" class="form-control" placeholder="Filter courses..."
-                onkeyup="searchCourses()">
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <div class="list-toolbar w-100">
+            <div class="card-title mb-0">Assigned Course Records</div>
+            <div class="input-group search-input">
+                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                <input type="text" id="course-search" class="form-control" placeholder="Filter courses..." oninput="window.debouncedSearch()">
+            </div>
+            <span id="instructor-course-total" class="badge text-bg-light border">0 courses</span>
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Identifier</th>
@@ -29,26 +31,30 @@
             </tbody>
         </table>
     </div>
+    <div class="card-footer bg-white" id="instructor-course-pagination"></div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
     if (Auth.guard(['instructor'])) {
-        let allMyCourses = [];
+        window.debouncedSearch = UI.debounce(() => loadInstructing(1));
 
-        async function loadInstructing() {
+        async function loadInstructing(page = 1) {
             try {
-                const me = await Api.fetch('/instructors/me');
-                allMyCourses = me.courses;
-                renderCourses(allMyCourses);
+                const query = encodeURIComponent(document.getElementById('course-search').value.trim());
+                const data = await Api.fetch(`/instructors/me/courses?page=${page}&per_page=8&q=${query}`);
+
+                document.getElementById('instructor-course-total').innerText = `${data.total} courses`;
+                renderCourses(data.courses);
+                UI.pagination('instructor-course-pagination', data.pages, data.current_page, loadInstructing);
             } catch (err) { UI.toast(err.message, 'error'); }
         }
 
         function renderCourses(courses) {
             const tbody = document.getElementById('instructor-courses-body');
             if (courses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No matching courses found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No matching courses found.</td></tr>';
                 return;
             }
 
@@ -69,13 +75,7 @@
             `).join('');
         }
 
-        window.searchCourses = () => {
-            const q = document.getElementById('course-search').value.toLowerCase();
-            const filtered = allMyCourses.filter(c => c.name.toLowerCase().includes(q));
-            renderCourses(filtered);
-        };
-
-        document.addEventListener('DOMContentLoaded', loadInstructing);
+        document.addEventListener('DOMContentLoaded', () => loadInstructing(1));
     }
 </script>
 {% endblock %}

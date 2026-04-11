@@ -3,15 +3,18 @@
 {% block page_title %}Explore Curriculum{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <div class="search-bar" style="width: 100%; max-width: 400px;">
-            <i class="fas fa-search"></i>
-            <input type="text" id="course-search" class="form-control" placeholder="Search by course name..." oninput="window.debouncedSearch()">
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <div class="list-toolbar">
+            <div class="input-group search-input">
+                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                <input type="text" id="course-search" class="form-control" placeholder="Search by course name..." oninput="window.debouncedSearch()">
+            </div>
+            <span id="catalog-total-count" class="badge text-bg-light border">0 courses</span>
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -26,7 +29,7 @@
             </tbody>
         </table>
     </div>
-    <div class="card-body" id="catalog-pagination"></div>
+    <div class="card-footer bg-white" id="catalog-pagination"></div>
 </div>
 {% endblock %}
 
@@ -42,12 +45,13 @@
                 const me = await Api.fetch('/students/me');
                 myCourseIds = me.courses.map(c => c.id);
 
-                const query = document.getElementById('course-search').value;
-                const data = await Api.fetch(`/courses?page=${page}&q=${query}`);
+                const query = encodeURIComponent(document.getElementById('course-search').value.trim());
+                const data = await Api.fetch(`/courses?page=${page}&per_page=8&q=${query}`);
                 
                 const tbody = document.getElementById('catalog-body');
+                document.getElementById('catalog-total-count').innerText = `${data.total} courses`;
                 if (data.courses.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No courses found matching your query.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No courses found matching your query.</td></tr>';
                 } else {
                     tbody.innerHTML = data.courses.map(c => {
                         const isEnrolled = myCourseIds.includes(c.id);
@@ -66,7 +70,7 @@
                         `;
                     }).join('');
                 }
-                UI.pagination('catalog-pagination', data.pages, data.current_page, 'loadCatalog');
+                UI.pagination('catalog-pagination', data.pages, data.current_page, loadCatalog);
             } catch (err) { UI.toast(err.message, 'error'); }
         }
 
