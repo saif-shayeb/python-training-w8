@@ -1,3 +1,7 @@
+from app.models.user import User
+from database import db_session
+
+
 def test_get_all_students(client, seed_data):
     response = client.get("/api/students", headers=seed_data["admin_headers"])
     assert response.status_code == 200
@@ -101,6 +105,7 @@ def test_delete_student(client, seed_data):
         },
     )
     student_id = post_resp.json["id"]
+    deleted_user_id = seed_data["empty_student_user_id"]
 
     # Delete
     del_resp = client.delete(f"/api/students/{student_id}", headers=seed_data["admin_headers"])
@@ -109,3 +114,13 @@ def test_delete_student(client, seed_data):
     # Verify it's gone
     get_resp = client.get(f"/api/students/{student_id}", headers=seed_data["admin_headers"])
     assert get_resp.status_code == 404
+
+    # Verify linked user was also deleted
+    assert db_session.get(User, deleted_user_id) is None
+
+
+def test_get_all_students_invalid_pagination(client, seed_data):
+    response = client.get(
+        "/api/students?page=1&per_page=0", headers=seed_data["admin_headers"]
+    )
+    assert response.status_code == 400

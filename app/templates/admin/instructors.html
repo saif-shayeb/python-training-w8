@@ -1,59 +1,77 @@
-{% extends "base.html" %}
-{% block title %}Manage Instructors - EduSpace{% endblock %}
-{% block page_title %}Instructor Directory{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Manage Instructors - EduSpace{%
+endblock %} {% block page_title %}Instructor Directory{% endblock %} {% block
+content %}
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-white py-3">
-        <div class="list-toolbar">
-            <div class="input-group search-input">
-                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                <input type="text" id="instructor-search" class="form-control" placeholder="Search by name..." oninput="window.debouncedSearch()">
-            </div>
-            <span id="instructor-total-count" class="badge text-bg-light border">0 instructors</span>
-        </div>
+  <div class="card-header bg-white py-3">
+    <div class="list-toolbar">
+      <div class="input-group search-input">
+        <span class="input-group-text bg-white"
+          ><i class="fas fa-search"></i
+        ></span>
+        <input
+          type="text"
+          id="instructor-search"
+          class="form-control"
+          placeholder="Search by name..."
+          oninput="window.debouncedSearch()"
+        />
+      </div>
+      <span id="instructor-total-count" class="badge text-bg-light border"
+        >0 instructors</span
+      >
     </div>
-    <div class="card-header bg-white border-top-0 pt-0 pb-3">
-        <div class="d-flex justify-content-end">
-            <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Academic Account</a>
-        </div>
+  </div>
+  <div class="card-header bg-white border-top-0 pt-0 pb-3">
+    <div class="d-flex justify-content-end">
+      <a href="/admin/add-user" class="btn btn-primary btn-sm"
+        ><i class="fas fa-plus"></i> Create Academic Account</a
+      >
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Specialization / Major</th>
-                    <th>User Account</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="instructors-table-body">
-                <tr><td colspan="5" style="text-align:center">Loading data...</td></tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer bg-white" id="instructor-pagination"></div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Specialization / Major</th>
+          <th>User Account</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="instructors-table-body">
+        <tr>
+          <td colspan="5" style="text-align: center">Loading data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer bg-white" id="instructor-pagination"></div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-    if (Auth.guard(['admin'])) {
-        window.debouncedSearch = UI.debounce(() => loadInstructors(1));
+  if (Auth.guard(["admin"])) {
+    window.debouncedSearch = UI.debounce(() => loadInstructors(1));
 
-        async function loadInstructors(page = 1) {
-            try {
-                const query = encodeURIComponent(document.getElementById('instructor-search').value.trim());
-                const data = await Api.fetch(`/instructors?page=${page}&per_page=8&q=${query}`);
-                
-                const tbody = document.getElementById('instructors-table-body');
-                document.getElementById('instructor-total-count').innerText = `${data.total} instructors`;
-                if (data.instructors.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No instructors found.</td></tr>';
-                } else {
-                    tbody.innerHTML = data.instructors.map(i => `
+    async function loadInstructors(page = 1) {
+      try {
+        const query = encodeURIComponent(
+          document.getElementById("instructor-search").value.trim(),
+        );
+        const data = await Api.fetch(
+          `/instructors?page=${page}&per_page=8&q=${query}`,
+        );
+
+        const tbody = document.getElementById("instructors-table-body");
+        document.getElementById("instructor-total-count").innerText =
+          `${data.total} instructors`;
+        if (data.instructors.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="text-center text-muted py-4">No instructors found.</td></tr>';
+        } else {
+          tbody.innerHTML = data.instructors
+            .map(
+              (i) => `
                         <tr>
                             <td>#${i.id}</td>
                             <td style="font-weight:500">${i.name}</td>
@@ -63,23 +81,38 @@
                                 <button class="btn btn-danger btn-sm" onclick="deleteInstructor(${i.id})"><i class="fas fa-trash-alt"></i></button>
                             </td>
                         </tr>
-                    `).join('');
-                }
-                UI.pagination('instructor-pagination', data.pages, data.current_page, loadInstructors);
-            } catch (err) { UI.toast(err.message, 'error'); }
+                    `,
+            )
+            .join("");
         }
-
-        window.deleteInstructor = async (id) => {
-            if (confirm('Delete this instructor account? It may be linked to active courses.')) {
-                try {
-                    await Api.fetch(`/instructors/${id}`, { method: 'DELETE' });
-                    UI.toast('Instructor removed');
-                    loadInstructors();
-                } catch (err) { UI.toast(err.message, 'error'); }
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => loadInstructors(1));
+        UI.pagination(
+          "instructor-pagination",
+          data.pages,
+          data.current_page,
+          loadInstructors,
+        );
+      } catch (err) {
+        UI.toast(err.message, "error");
+      }
     }
+
+    window.deleteInstructor = async (id) => {
+      if (
+        confirm(
+          "Delete this instructor account? It may be linked to active courses.",
+        )
+      ) {
+        try {
+          await Api.fetch(`/instructors/${id}`, { method: "DELETE" });
+          UI.toast("Instructor removed");
+          loadInstructors();
+        } catch (err) {
+          UI.toast(err.message, "error");
+        }
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => loadInstructors(1));
+  }
 </script>
 {% endblock %}

@@ -38,3 +38,8 @@ def test_delete_course(client, seed_data):
     get_resp = client.get(
         f"/api/courses/{seed_data['course_id']}", headers=seed_data["admin_headers"])
     assert get_resp.status_code == 404
+
+
+def test_get_courses_invalid_pagination(client, seed_data):
+    resp = client.get("/api/courses?page=0&per_page=10", headers=seed_data["admin_headers"])
+    assert resp.status_code == 400

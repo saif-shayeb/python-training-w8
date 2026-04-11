@@ -18,6 +18,9 @@ def get_all_instructors():
     per_page = request.args.get("per_page", 10, type=int)
     search_query = request.args.get("q", "", type=str)
 
+    if page < 1 or per_page < 1:
+        abort(400, description="Invalid pagination: 'page' and 'per_page' must be >= 1")
+
     query = Instructor.query
     if search_query:
         query = query.filter(Instructor.name.ilike(f"%{search_query}%"))
@@ -83,13 +86,16 @@ def get_my_courses():
     per_page = request.args.get("per_page", 8, type=int)
     search_query = request.args.get("q", "", type=str).strip()
 
+    if page < 1 or per_page < 1:
+        abort(400, description="Invalid pagination: 'page' and 'per_page' must be >= 1")
+
     query = Course.query.filter_by(instructor_id=instructor.id)
     if search_query:
         query = query.filter(Course.name.ilike(f"%{search_query}%"))
 
     total = query.count()
     import math
-    total_pages = math.ceil(total / per_page) if per_page > 0 else 0
+    total_pages = math.ceil(total / per_page)
 
     courses = query.offset((page - 1) * per_page).limit(per_page).all()
 

@@ -1,6 +1,10 @@
 import os
 import sys
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 
 from app.models.courses import Course
 from app.models.instructor import Instructor
@@ -11,7 +15,6 @@ from werkzeug.security import generate_password_hash
 from database import Base, db_session, engine
 from app import create_app
 import pytest
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 @pytest.fixture(scope="session")

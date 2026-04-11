@@ -60,6 +60,8 @@ def drop_student(student_id, course_id):
 
     current_user_id = int(get_jwt_identity())
     user = db_session.get(User, current_user_id)
+    if not user:
+        abort(401, description="Invalid user identity")
 
     target_student = db_session.get(Student, student_id)
     if not target_student:
@@ -78,16 +80,6 @@ def drop_student(student_id, course_id):
     db_session.delete(enrollment)
     db_session.commit()
     return jsonify({"message": "Successfully dropped course"}), 200
-    # Backward-compatible delete endpoint using composite identifiers.
-    enrollment = Enrollment.query.filter_by(
-        student_id=student_id, course_id=course_id
-    ).first()
-    if not enrollment:
-        abort(404, description="Enrollment record not found")
-
-    db_session.delete(enrollment)
-    db_session.commit()
-    return jsonify({"message": "Enrollment removed successfully"}), 200
 
 
 @enrollment_bp.errorhandler(HTTPException)

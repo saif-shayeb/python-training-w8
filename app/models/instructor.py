@@ -8,6 +8,16 @@ class Instructor(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
     major = Column(String(100), nullable=False)
-    user_id = Column(Integer, ForeignKey("Users.id"), unique=True, nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("Users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
     user = relationship("User", back_populates="instructor")
-    courses = relationship("Course", back_populates="instructor")
+    courses = relationship(
+        "Course",
+        back_populates="instructor",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

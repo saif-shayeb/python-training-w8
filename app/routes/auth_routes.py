@@ -30,6 +30,8 @@ def register():
     # Check if user already exists
     if User.query.filter_by(username=data["username"]).first():
         abort(400, description="Username already taken")
+    if User.query.filter_by(email=data["email"]).first():
+        abort(400, description="Email already in use")
 
     # Hash the password securely!
     hashed_password = generate_password_hash(data["password"])
@@ -89,6 +91,8 @@ def register():
 
     except Exception as e:
         db_session.rollback()
+        if "UNIQUE constraint failed" in str(e):
+            abort(400, description="Username or email already in use")
         abort(500, description=f"Database error occurred: {str(e)}")
 
 

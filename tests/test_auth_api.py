@@ -30,6 +30,28 @@ def test_register_missing_fields(client, db):
     assert resp.status_code == 400
 
 
+def test_register_duplicate_email(client, db):
+    first = client.post("/api/auth/register", json={
+        "username": "first_user",
+        "password": "password",
+        "email": "dup@example.com",
+        "role": "student",
+        "name": "First User",
+        "gpa": 3.2
+    })
+    assert first.status_code == 201
+
+    second = client.post("/api/auth/register", json={
+        "username": "second_user",
+        "password": "password",
+        "email": "dup@example.com",
+        "role": "student",
+        "name": "Second User",
+        "gpa": 3.4
+    })
+    assert second.status_code == 400
+
+
 def test_login_success(client, seed_data):
     resp = client.post("/api/auth/login", json={
         "username": "active_user",

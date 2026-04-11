@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, abort
 from werkzeug.exceptions import HTTPException
 from app.models.student import Student
 from app.models.courses import Course
+from app.models.user import User
 from database import db_session
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from app.utils import role_required
@@ -16,6 +17,9 @@ def get_all_students():
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
     search_query = request.args.get("q", "", type=str)
+
+    if page < 1 or per_page < 1:
+        abort(400, description="Invalid pagination: 'page' and 'per_page' must be >= 1")
 
     query = Student.query
     if search_query:
@@ -233,10 +237,15 @@ def delete_student(student_id):
     if not student:
         abort(404, description="Student not found")
 
+    linked_user = db_session.get(User, student.user_id)
+    if not linked_user:
+        abort(404, description="Associated user not found")
+
     try:
-        db_session.delete(student)
+        # Delete the owning user as requested; student row is removed via cascade.
+        db_session.delete(linked_user)
         db_session.commit()
-        return jsonify({"message": "Student deleted successfully"}), 200
+        return jsonify({"message": "Student and associated user deleted successfully"}), 200
     except Exception:
         db_session.rollback()
         abort(500, description="Database error occurred")

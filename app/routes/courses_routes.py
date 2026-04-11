@@ -17,6 +17,9 @@ def get_all_courses():
     per_page = request.args.get("per_page", 10, type=int)
     search_query = request.args.get("q", "", type=str)
 
+    if page < 1 or per_page < 1:
+        abort(400, description="Invalid pagination: 'page' and 'per_page' must be >= 1")
+
     query = Course.query
     if search_query:
         query = query.filter(Course.name.ilike(f"%{search_query}%"))

@@ -7,7 +7,12 @@ class Student(Base):
     __tablename__ = "Students"
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    user_id = Column(Integer, ForeignKey("Users.id"), unique=True, nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("Users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
     user = relationship("User", back_populates="student")
 
     name = Column(String(100), nullable=False)

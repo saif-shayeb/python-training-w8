@@ -1,49 +1,54 @@
-{% extends "base.html" %}
-{% block title %}My Learning Progress - EduSpace{% endblock %}
-{% block page_title %}Academic Course Summary{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}My Learning Progress - EduSpace{%
+endblock %} {% block page_title %}Academic Course Summary{% endblock %} {% block
+content %}
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-white">
-        <div class="card-title">Enrolled Academic Records</div>
-        <a href="/student/catalog" class="btn btn-outline btn-sm"><i class="fas fa-plus"></i> View All Available Courses</a>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>identifier</th>
-                    <th>Course Title</th>
-                    <th>Lead Faculty</th>
-                    <th>Academic Credits</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="my-courses-body">
-                <tr><td colspan="6" style="text-align:center">Fetching your learning records...</td></tr>
-            </tbody>
-        </table>
-    </div>
+  <div class="card-header bg-white">
+    <div class="card-title">Enrolled Academic Records</div>
+    <a href="/student/catalog" class="btn btn-outline btn-sm"
+      ><i class="fas fa-plus"></i> View All Available Courses</a
+    >
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>identifier</th>
+          <th>Course Title</th>
+          <th>Lead Faculty</th>
+          <th>Academic Credits</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="my-courses-body">
+        <tr>
+          <td colspan="6" style="text-align: center">
+            Fetching your learning records...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-    if (Auth.guard(['student'])) {
-        async function loadMyProfile() {
-            try {
-                const me = await Api.fetch('/students/me');
-                const tbody = document.getElementById('my-courses-body');
-                
-                if (me.courses.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No active enrollments detected on your academic profile.</td></tr>';
-                } else {
-                    tbody.innerHTML = me.courses.map(c => `
+  if (Auth.guard(["student"])) {
+    async function loadMyProfile() {
+      try {
+        const me = await Api.fetch("/students/me");
+        const tbody = document.getElementById("my-courses-body");
+
+        if (me.courses.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="6" class="text-center text-muted py-4">No active enrollments detected on your academic profile.</td></tr>';
+        } else {
+          tbody.innerHTML = me.courses
+            .map(
+              (c) => `
                         <tr>
                             <td>#CRS-${c.id}</td>
                             <td style="font-weight:600">${c.name}</td>
-                            <td>${c.instructor ? 'Prof. ' + c.instructor.name : '<em>TBD</em>'}</td>
+                            <td>${c.instructor ? "Prof. " + c.instructor.name : "<em>TBD</em>"}</td>
                             <td><span class="badge badge-neutral">${c.credits} Hrs</span></td>
                             <td><span class="badge badge-success">Attending</span></td>
                             <td>
@@ -53,22 +58,34 @@
                                 </div>
                             </td>
                         </tr>
-                    `).join('');
-                }
-            } catch (err) { UI.toast(err.message, 'error'); }
+                    `,
+            )
+            .join("");
         }
-
-        window.dropCourse = async (studentId, courseId) => {
-            if (confirm('Are you sure you want to withdraw from this course catalog entry?')) {
-                try {
-                    await Api.fetch(`/enrollments/${studentId}/${courseId}`, { method: 'DELETE' });
-                    UI.toast('Withdrawal complete');
-                    loadMyProfile();
-                } catch (err) { UI.toast(err.message, 'error'); }
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', loadMyProfile);
+      } catch (err) {
+        UI.toast(err.message, "error");
+      }
     }
+
+    window.dropCourse = async (studentId, courseId) => {
+      if (
+        confirm(
+          "Are you sure you want to withdraw from this course catalog entry?",
+        )
+      ) {
+        try {
+          await Api.fetch(`/enrollments/${studentId}/${courseId}`, {
+            method: "DELETE",
+          });
+          UI.toast("Withdrawal complete");
+          loadMyProfile();
+        } catch (err) {
+          UI.toast(err.message, "error");
+        }
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", loadMyProfile);
+  }
 </script>
 {% endblock %}

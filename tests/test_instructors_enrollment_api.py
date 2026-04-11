@@ -57,3 +57,11 @@ def test_enroll_and_delete_by_enrollment_id(client, seed_data):
         headers=seed_data["admin_headers"]
     )
     assert second_delete_resp.status_code == 404
+
+
+def test_get_instructors_invalid_pagination(client, seed_data):
+    resp = client.get(
+        "/api/instructors?page=1&per_page=0",
+        headers=seed_data["admin_headers"],
+    )
+    assert resp.status_code == 400

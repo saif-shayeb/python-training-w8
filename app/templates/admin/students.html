@@ -1,63 +1,80 @@
-{% extends "base.html" %}
-{% block title %}Manage Students - EduSpace{% endblock %}
-{% block page_title %}Student Directory{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Manage Students - EduSpace{% endblock
+%} {% block page_title %}Student Directory{% endblock %} {% block content %}
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-white py-3">
-        <div class="list-toolbar">
-            <div class="input-group search-input">
-                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                <input type="text" id="student-search" class="form-control" placeholder="Search by name..." oninput="window.debouncedSearch()">
-            </div>
-            <span id="student-total-count" class="badge text-bg-light border">0 students</span>
-        </div>
+  <div class="card-header bg-white py-3">
+    <div class="list-toolbar">
+      <div class="input-group search-input">
+        <span class="input-group-text bg-white"
+          ><i class="fas fa-search"></i
+        ></span>
+        <input
+          type="text"
+          id="student-search"
+          class="form-control"
+          placeholder="Search by name..."
+          oninput="window.debouncedSearch()"
+        />
+      </div>
+      <span id="student-total-count" class="badge text-bg-light border"
+        >0 students</span
+      >
     </div>
-    <div class="card-header bg-white border-top-0 pt-0 pb-3">
-        <div class="d-flex justify-content-end">
-            <a href="/admin/add-user" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Academic Account</a>
-        </div>
+  </div>
+  <div class="card-header bg-white border-top-0 pt-0 pb-3">
+    <div class="d-flex justify-content-end">
+      <a href="/admin/add-user" class="btn btn-primary btn-sm"
+        ><i class="fas fa-plus"></i> Create Academic Account</a
+      >
     </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>Academic GPA</th>
-                    <th>Enrollments</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="students-table-body">
-                <tr><td colspan="5" style="text-align:center">Loading data...</td></tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer bg-white" id="student-pagination"></div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Full Name</th>
+          <th>Academic GPA</th>
+          <th>Enrollments</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="students-table-body">
+        <tr>
+          <td colspan="5" style="text-align: center">Loading data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer bg-white" id="student-pagination"></div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-    if (Auth.guard(['admin'])) {
-        window.debouncedSearch = UI.debounce(() => loadStudents(1));
+  if (Auth.guard(["admin"])) {
+    window.debouncedSearch = UI.debounce(() => loadStudents(1));
 
-        async function loadStudents(page = 1) {
-            try {
-                const query = encodeURIComponent(document.getElementById('student-search').value.trim());
-                const data = await Api.fetch(`/students?page=${page}&per_page=8&q=${query}`);
-                
-                const tbody = document.getElementById('students-table-body');
-                document.getElementById('student-total-count').innerText = `${data.total} students`;
-                if (data.students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No students found.</td></tr>';
-                } else {
-                    tbody.innerHTML = data.students.map(s => `
+    async function loadStudents(page = 1) {
+      try {
+        const query = encodeURIComponent(
+          document.getElementById("student-search").value.trim(),
+        );
+        const data = await Api.fetch(
+          `/students?page=${page}&per_page=8&q=${query}`,
+        );
+
+        const tbody = document.getElementById("students-table-body");
+        document.getElementById("student-total-count").innerText =
+          `${data.total} students`;
+        if (data.students.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="text-center text-muted py-4">No students found.</td></tr>';
+        } else {
+          tbody.innerHTML = data.students
+            .map(
+              (s) => `
                         <tr>
                             <td>#${s.id}</td>
                             <td style="font-weight:500">${s.name}</td>
-                            <td><span class="badge ${s.gpa >= 3.5 ? 'badge-success' : 'badge-neutral'}">${s.gpa.toFixed(1)}</span></td>
+                            <td><span class="badge ${s.gpa >= 3.5 ? "badge-success" : "badge-neutral"}">${s.gpa.toFixed(1)}</span></td>
                             <td>${s.courses.length} Courses</td>
                             <td>
                                 <div class="flex gap-2">
@@ -66,46 +83,63 @@
                                 </div>
                             </td>
                         </tr>
-                    `).join('');
-                }
-                UI.pagination('student-pagination', data.pages, data.current_page, loadStudents);
-            } catch (err) { UI.toast(err.message, 'error'); }
+                    `,
+            )
+            .join("");
         }
-
-        window.openEditStudent = (id, name, gpa) => {
-            document.getElementById('u-student-id').innerText = id;
-            document.getElementById('u-student-name').value = name;
-            document.getElementById('u-student-gpa').value = gpa;
-            UI.modal.open('updateStudentModal');
-        };
-
-        window.submitStudentUpdate = async () => {
-            const id = document.getElementById('u-student-id').innerText;
-            try {
-                await Api.fetch(`/students/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        name: document.getElementById('u-student-name').value,
-                        gpa: parseFloat(document.getElementById('u-student-gpa').value)
-                    })
-                });
-                UI.modal.close('updateStudentModal');
-                UI.toast('Student updated successfully');
-                loadStudents();
-            } catch (err) { UI.toast(err.message, 'error'); }
-        };
-
-        window.deleteStudent = async (id) => {
-            if (confirm('Are you sure you want to remove this student account? All enrollments will be lost.')) {
-                try {
-                    await Api.fetch(`/students/${id}`, { method: 'DELETE' });
-                    UI.toast('Student deleted');
-                    loadStudents();
-                } catch (err) { UI.toast(err.message, 'error'); }
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => loadStudents(1));
+        UI.pagination(
+          "student-pagination",
+          data.pages,
+          data.current_page,
+          loadStudents,
+        );
+      } catch (err) {
+        UI.toast(err.message, "error");
+      }
     }
+
+    window.openEditStudent = (id, name, gpa) => {
+      document.getElementById("u-student-id").innerText = id;
+      document.getElementById("u-student-name").value = name;
+      document.getElementById("u-student-gpa").value = gpa;
+      UI.modal.open("updateStudentModal");
+    };
+
+    window.submitStudentUpdate = async () => {
+      const id = document.getElementById("u-student-id").innerText;
+      try {
+        await Api.fetch(`/students/${id}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            name: document.getElementById("u-student-name").value,
+            gpa: parseFloat(document.getElementById("u-student-gpa").value),
+          }),
+        });
+        UI.modal.close("updateStudentModal");
+        UI.toast("Student updated successfully");
+        loadStudents();
+      } catch (err) {
+        UI.toast(err.message, "error");
+      }
+    };
+
+    window.deleteStudent = async (id) => {
+      if (
+        confirm(
+          "Are you sure you want to remove this student account? All enrollments will be lost.",
+        )
+      ) {
+        try {
+          await Api.fetch(`/students/${id}`, { method: "DELETE" });
+          UI.toast("Student deleted");
+          loadStudents();
+        } catch (err) {
+          UI.toast(err.message, "error");
+        }
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => loadStudents(1));
+  }
 </script>
 {% endblock %}

@@ -8,8 +8,10 @@ class Course(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
     credits = Column(Integer, nullable=False)
-    instructor_id = Column(Integer, ForeignKey("Instructors.id"), nullable=False)
+    instructor_id = Column(
+        Integer, ForeignKey("Instructors.id", ondelete="CASCADE"), nullable=False
+    )
     students = relationship(
         "Student", secondary="Enrollments", back_populates="courses"
     )
-    instructor = relationship("Instructor", back_populates="courses")
+    instructor = relationship("Instructor", back_populates="courses", passive_deletes=True)

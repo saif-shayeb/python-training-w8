@@ -1,3 +1,5 @@
+import os
+
 from app.models.user import User
 from app.models.student import Student
 from app.models.courses import Course
@@ -6,10 +8,13 @@ from database import db_session, init_db, Base, engine
 from werkzeug.security import generate_password_hash
 
 
+SEED_DEFAULT_PASSWORD = os.getenv("SEED_DEFAULT_PASSWORD", "password123")
+
+
 def build_user(username, email, role, is_active=True):
     return User(
         username=username,
-        password=generate_password_hash("password123"),
+        password=generate_password_hash(SEED_DEFAULT_PASSWORD),
         email=email,
         role=role,
         is_active=is_active,

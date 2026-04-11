@@ -1,77 +1,88 @@
-{% extends "base.html" %}
-{% block title %}Faculty Dashboard - EduSpace{% endblock %}
-{% block page_title %}Faculty Portal Home{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Faculty Dashboard - EduSpace{%
+endblock %} {% block page_title %}Faculty Portal Home{% endblock %} {% block
+content %}
 <div class="stats-grid">
-    <div class="stat-card shadow-sm border-0">
-        <div class="stat-title">Department Affiliation</div>
-        <div class="stat-value" id="stats-major" style="font-size: 20px;">-</div>
-    </div>
-    <div class="stat-card shadow-sm border-0">
-        <div class="stat-title">Active Courses Assigned</div>
-        <div class="stat-value" id="stats-course-count">0</div>
-    </div>
-    <div class="stat-card shadow-sm border-0">
-        <div class="stat-title">Total Student Interaction</div>
-        <div class="stat-value" id="stats-student-count">0</div>
-    </div>
+  <div class="stat-card shadow-sm border-0">
+    <div class="stat-title">Department Affiliation</div>
+    <div class="stat-value" id="stats-major" style="font-size: 20px">-</div>
+  </div>
+  <div class="stat-card shadow-sm border-0">
+    <div class="stat-title">Active Courses Assigned</div>
+    <div class="stat-value" id="stats-course-count">0</div>
+  </div>
+  <div class="stat-card shadow-sm border-0">
+    <div class="stat-title">Total Student Interaction</div>
+    <div class="stat-value" id="stats-student-count">0</div>
+  </div>
 </div>
 
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-white">
-        <div class="card-title">Assigned Teaching Schedule</div>
-        <a href="/instructor/courses" class="btn btn-outline btn-sm">Full Catalog</a>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Course Title</th>
-                    <th>Enrolled Students</th>
-                    <th>Credits</th>
-                </tr>
-            </thead>
-            <tbody id="teaching-list">
-                <tr><td colspan="4" style="text-align:center">Fetching teaching records...</td></tr>
-            </tbody>
-        </table>
-    </div>
+  <div class="card-header bg-white">
+    <div class="card-title">Assigned Teaching Schedule</div>
+    <a href="/instructor/courses" class="btn btn-outline btn-sm"
+      >Full Catalog</a
+    >
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Course Title</th>
+          <th>Enrolled Students</th>
+          <th>Credits</th>
+        </tr>
+      </thead>
+      <tbody id="teaching-list">
+        <tr>
+          <td colspan="4" style="text-align: center">
+            Fetching teaching records...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-    if (Auth.guard(['instructor'])) {
-        async function loadProfile() {
-            try {
-                const me = await Api.fetch('/instructors/me');
-                document.getElementById('stats-major').innerText = me.major;
-                document.getElementById('stats-course-count').innerText = me.courses.length;
-                
-                // Calculate total students across all courses
-                let totalStudents = 0;
-                me.courses.forEach(c => totalStudents += c.students.length);
-                document.getElementById('stats-student-count').innerText = totalStudents;
-                
-                const list = document.getElementById('teaching-list');
-                if (me.courses.length === 0) {
-                    list.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No courses currently assigned to you.</td></tr>';
-                } else {
-                    list.innerHTML = me.courses.map(c => `
+  if (Auth.guard(["instructor"])) {
+    async function loadProfile() {
+      try {
+        const me = await Api.fetch("/instructors/me");
+        document.getElementById("stats-major").innerText = me.major;
+        document.getElementById("stats-course-count").innerText =
+          me.courses.length;
+
+        // Calculate total students across all courses
+        let totalStudents = 0;
+        me.courses.forEach((c) => (totalStudents += c.students.length));
+        document.getElementById("stats-student-count").innerText =
+          totalStudents;
+
+        const list = document.getElementById("teaching-list");
+        if (me.courses.length === 0) {
+          list.innerHTML =
+            '<tr><td colspan="4" class="text-center text-muted py-4">No courses currently assigned to you.</td></tr>';
+        } else {
+          list.innerHTML = me.courses
+            .map(
+              (c) => `
                         <tr>
                             <td>#CRS-${c.id}</td>
                             <td style="font-weight:600">${c.name}</td>
                             <td><span class="badge badge-success">${c.students.length} Students</span></td>
                             <td>${c.credits} Credits</td>
                         </tr>
-                    `).join('');
-                }
-            } catch (err) { UI.toast(err.message, 'error'); }
+                    `,
+            )
+            .join("");
         }
-
-        document.addEventListener('DOMContentLoaded', loadProfile);
+      } catch (err) {
+        UI.toast(err.message, "error");
+      }
     }
+
+    document.addEventListener("DOMContentLoaded", loadProfile);
+  }
 </script>
 {% endblock %}
