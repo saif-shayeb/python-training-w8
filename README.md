@@ -1,151 +1,231 @@
-# 🎓 EduSpace Student Portal API
+# EduSpace Student Management Dashboard Pro
 
-Welcome to the **EduSpace Student Portal API**, a fully modular and professionally deployed RESTful API with a stunning front-end Dashboard interface.
+A Flask + SQLAlchemy student management system with:
 
-Built during Week 8 of Python Training, this project seamlessly combines modern API best-practices, encrypted token security, and rich Jinja templating.
+- Role-based JWT authentication (admin, instructor, student)
+- Many-to-many student-course enrollment API
+- Profile picture upload
+- Search and pagination across listing endpoints
+- Admin, instructor, and student dashboard pages (Jinja + Bootstrap)
+- Automated tests with pytest
 
-## 🌟 Key Features
-- **Application Factory Pattern:** Scalable `create_app()` architecture utilizing Flask Blueprints for extreme modularity.
-- **Role-Based Token Authentication:** Armed with `flask-jwt-extended` to ensure routes are strictly protected by User Roles (`admin` vs `student`).
-- **Relational Data Mapping:** Robust SQLite schemas establishing One-To-One (`User` ↔ `Student`) and Many-To-Many (`Student` ↔ `Course`) relationships using pure SQLAlchemy.
-- **Immaculate UI/UX:** Built-in Administrator Dashboard rendered globally over Jinja (`/` route). We didn't settle for boring; it utilizes cutting-edge Vanilla CSS Glassmorphism, tailored hex pallets, smooth dynamic micro-animations, and responsive layout grids.
-- **Automated Validation:** Comes fully fortified with a `unittest` + Flask Test Client testing suite completely covering core REST actions (`GET`, `POST`, `PUT`, `DELETE`).
+This project uses a modular blueprint-based architecture and is designed as a Week 9 capstone expansion.
 
----
+## Highlights
 
-## 📸 Screenshots (Replace these before submitting!)
+- Application factory pattern with blueprints
+- Relational model design with cascade-aware foreign keys
+- Enrollment uniqueness enforced at database level
+- Student deletion removes linked user account
+- Custom 404 and 500 error pages
+- CI workflow for lint + tests
 
-> To pass your assignment, take a screenshot of your beautiful Jinja Dashboard and of a successful Postman API call, and paste them here!
+## Tech Stack
 
-![Dashboard UI Placeholder](https://via.placeholder.com/800x400?text=Paste+your+Jinja+Dashboard+Screenshot+Here)
-![Postman Test Placeholder](https://via.placeholder.com/800x400?text=Paste+your+Postman+API+Test+Here)
+- Python 3.x
+- Flask
+- SQLAlchemy
+- Flask-JWT-Extended
+- SQLite
+- Jinja2 + Bootstrap + vanilla JavaScript
+- pytest + pytest-cov + flake8
 
----
+## Project Structure
 
-## 🗄️ Database Schema
+Top-level modules:
 
-The system is built on a relational SQLite database managed by SQLAlchemy.
+- app/: Flask app package (routes, models, templates, static)
+- tests/: API test suite
+- run.py: dev server entry point
+- seed.py: reset + seed script
+- database.py: engine/session/base setup
 
-### Core Models
-- **User**: Stores authentication credentials.
-  - `id` (Integer, PK): Unique identifier.
-  - `username` (String): Unique login name.
-  - `password` (String): Securely hashed password.
-  - `role` (String): Role-based access control (`admin`, `student`, `instructor`).
-  - `email` (String): Primary contact email.
-- **Student**: profile linked to a User.
-  - `user_id` (FK): Links to `Users.id`.
-  - `name` (String): Full student name.
-  - `gpa` (Float): Academic performance metric.
-- **Instructor**: Profile linked to a User.
-  - `user_id` (FK): Links to `Users.id`.
-  - `name` (String): Instructor name.
-  - `major` (String): Department/Specialization.
-- **Course**: Academic offerings.
-  - `instructor_id` (FK): Links to `Instructors.id`.
-  - `name` (String): Title of the course.
-  - `credits` (Integer): Credit value.
-- **Enrollment** (Junction Table): Manages Many-to-Many relationship between Students and Courses.
+## Data Model
 
----
+Core entities:
 
-## 🚀 API Documentation
+- User
+  - Unique username and email
+  - Role: admin, instructor, student
+  - Active flag for approval workflow
+  - Optional profile picture URL
+- Student
+  - One-to-one with User
+  - GPA and many-to-many courses via Enrollment
+- Instructor
+  - One-to-one with User
+  - Major and one-to-many courses
+- Course
+  - Name, credits, instructor
+- Enrollment
+  - student_id + course_id unique pair
+  - Junction table between students and courses
 
-All API endpoints require a `JWT Bearer Token` in the `Authorization` header unless otherwise specified. Base URL: `/api`.
+Important behavior:
 
-### 🔐 Authentication (`/auth`)
-| Method | Endpoint | Payload | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/register` | `{username, password, role, email, ...}` | Create a new user and profile. |
-| `POST` | `/login` | `{username, password}` | Generate access token. |
+- Student deletion removes the linked user account
+- Cascade behavior is enabled with SQLite foreign keys turned on
 
-### 👨‍🎓 Students (`/students`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | Admin, Instructor | List all students (**Query params:** `q`, `page`, `per_page`). |
-| `GET` | `/me` | Student | Retrieve own profile data. |
-| `GET` | `/<id>` | Admin, Self | Get detailed student record. |
-| `PUT` | `/<id>` | Admin, Self | Update student information. |
-| `DELETE` | `/<id>` | Admin | Permanently remove student and associated user. |
+## API Overview
 
-### 👨‍🏫 Instructors (`/instructors`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | All | List all instructors (**Query params:** `q`, `page`, `per_page`). |
-| `GET` | `/me` | Instructor | Retrieve own instructor profile. |
-| `GET` | `/<id>` | All | Get detailed instructor record. |
-| `POST` | `/` | Admin | Manually create instructor profile. |
-| `PUT` | `/<id>` | Admin | Update instructor specialization/major. |
+Base API prefix: /api
 
-### 📚 Courses (`/courses`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | All | List all available courses (**Query params:** `q`, `page`, `per_page`). |
-| `GET` | `/<id>` | All | Get specific course details. |
-| `POST` | `/` | Admin | Add a new course to the catalog. |
-| `PUT` | `/<id>` | Admin | Update name, credits, or instructor. |
-| `DELETE` | `/<id>` | Admin | Archive/Remove course. |
+Authentication:
 
-### 📝 Enrollments (`/enrollments`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/` | Admin, Student | Enroll student in a course (body: `{course_id, student_id?}`). |
-| `DELETE` | `/<sid>/<cid>` | Admin, Student | Remove student from a specific course. |
+- POST /api/auth/register
+- POST /api/auth/login
 
----
+Students:
 
-## 🛠 Setup & Installation
+- GET /api/students
+  - Roles: admin, instructor
+  - Query params: q, page, per_page
+- GET /api/students/me
+  - Role: student
+- GET /api/students/<student_id>
+  - Roles: admin, student (self)
+- GET /api/students/<student_id>/courses
+  - Roles: admin, student (self)
+- POST /api/students
+  - Role: admin
+- PUT /api/students/<student_id>
+  - Roles: admin, student (self)
+- DELETE /api/students/<student_id>
+  - Role: admin
+  - Deletes student and associated user
 
-Follow these steps to boot the application up natively on your machine!
+Instructors:
 
-### 1. Clone the Repository
-```bash
-git clone <your-github-repo-url>
-cd python-training-w8d1
-```
+- GET /api/instructors
+  - Roles: admin, instructor, student
+  - Query params: q, page, per_page
+- GET /api/instructors/me
+  - Role: instructor
+- GET /api/instructors/me/courses
+  - Role: instructor
+  - Query params: q, page, per_page
+- GET /api/instructors/<instructor_id>
+  - Roles: admin, instructor, student
+- POST /api/instructors
+  - Role: admin
+- PUT /api/instructors/<instructor_id>
+  - Role: admin
+- DELETE /api/instructors/<instructor_id>
+  - Role: admin
 
-### 2. Prepare the Virtual Environment
-Create and activate an isolated Python container:
-**Windows:**
-```cmd
-python -m venv .venv
-.venv\Scripts\activate
-```
-**Mac/Linux:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+Courses:
 
-### 3. Install Requirements
-```bash
-pip install -r requirements.txt
-```
+- GET /api/courses
+  - Roles: admin, instructor, student
+  - Query params: q, page, per_page
+- GET /api/courses/<course_id>
+  - Roles: admin, instructor, student
+- POST /api/courses
+  - Role: admin
+- PUT /api/courses/<course_id>
+  - Role: admin
+- DELETE /api/courses/<course_id>
+  - Role: admin
 
-### 4. Database Setup & Seeding
-To immediately populate your local database with dummy users, students, and active courses, run the built-in CLI seeder:
-```bash
-python seed.py
-```
-*(This will safely reset the `app.db` and output `admin_test` / `john_doe`!)*
+Enrollments:
 
-### 5. Start the Server
-To launch the production-ready instance (or development server):
-```bash
-python run.py
-```
-*(Waitress / Gunicorn will be activated depending on your environment logic, or standard Flask via localhost:5000).*
+- POST /api/enrollments
+  - Roles: admin, student
+  - Admin payload includes student_id and course_id
+  - Student payload includes course_id
+- DELETE /api/enrollments/<student_id>/<course_id>
+  - Roles: admin, student (self)
 
----
+Users:
 
-## 🧪 Running the Test Suite
-The repository maintains full automated test coverage over its endpoints using the bundled `flask.testing` framework. 
+- POST /api/users/profile_pic
+  - JWT required
+  - Multipart form upload (image file)
+- GET /api/users/pending
+  - Role: admin
+- POST or PUT /api/users/<user_id>/approve
+  - Role: admin
 
-To execute the test suite, ensure your `.venv` is activated and type:
-```bash
-python -m pytest
-```
-*(Every single SQL transaction successfully executed by tests will gracefully rollback using `PendingRollbackError` prevention!)*
+## Setup
 
-## ☁️ Deployment Ready
-This repository comes dynamically prepped for Render.com hosting seamlessly leveraging `gunicorn`, `.env` OS Environment hooks mapped to SQLite defaults, and declarative package freezing (`requirements.txt`). Just point a Render Web Service to the repo and you're magically live!
+1. Clone and enter the repository
+
+   git clone <your-repo-url>
+   cd python-training-w8d1
+
+2. Create and activate virtual environment
+
+   Windows:
+   python -m venv .venv
+   .venv\Scripts\activate
+
+   Mac/Linux:
+   python3 -m venv .venv
+   source .venv/bin/activate
+
+3. Install dependencies
+
+   pip install -r requirements.txt
+
+4. Seed database (resets app.db)
+
+   python seed.py
+
+5. Run app
+
+   python run.py
+
+App URL: http://127.0.0.1:5000
+
+## Seed Data Notes
+
+- The seed script recreates the schema and inserts sample users/courses.
+- Default seeded password is controlled by environment variable:
+  - SEED_DEFAULT_PASSWORD (default: password123)
+
+## Testing
+
+Run all tests:
+
+python -m pytest -q
+
+Run with coverage:
+
+python -m pytest --cov=app --cov-report=term-missing
+
+Run lint:
+
+python -m flake8 app tests
+
+## CI
+
+GitHub Actions workflow runs lint and tests on pushes/PRs for main and dev.
+
+## Pagination and Validation Rules
+
+- page and per_page must be >= 1 on paginated endpoints.
+- Invalid pagination inputs return 400.
+
+## Error Handling
+
+- JSON error responses for API route exceptions
+- Custom templates for web 404 and 500 pages
+
+## Troubleshooting
+
+If pytest reports ModuleNotFoundError: No module named app:
+
+- Run tests from project root
+- Use the workspace venv interpreter explicitly:
+  d:/training/python-training-w8d1/.venv/Scripts/python.exe -m pytest -q
+
+If login fails for seeded users:
+
+- Rerun seeding: python seed.py
+- Ensure you are using the correct seed password (SEED_DEFAULT_PASSWORD)
+
+## Current Status
+
+- Tests passing locally
+- Role-based workflows functional for admin, instructor, and student
+- Core Week 9 backend features implemented
