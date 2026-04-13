@@ -6,14 +6,15 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 
-from app.models.courses import Course
-from app.models.instructor import Instructor
-from app.models.student import Student
-from app.models.user import User
-from flask_jwt_extended import create_access_token
-from werkzeug.security import generate_password_hash
-from database import Base, db_session, engine
-from app import create_app
+# conftest needs path bootstrap above so these imports intentionally follow it.
+from app.models.courses import Course  # noqa: E402
+from app.models.instructor import Instructor  # noqa: E402
+from app.models.student import Student  # noqa: E402
+from app.models.user import User  # noqa: E402
+from flask_jwt_extended import create_access_token  # noqa: E402
+from werkzeug.security import generate_password_hash  # noqa: E402
+from database import Base, db_session, engine  # noqa: E402
+from app import create_app  # noqa: E402
 import pytest
 
 
