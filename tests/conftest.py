@@ -1,25 +1,16 @@
 import os
 import sys
+import pytest
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 
-# conftest needs path bootstrap above so these imports intentionally follow it.
-from app.models.courses import Course  # noqa: E402
-from app.models.instructor import Instructor  # noqa: E402
-from app.models.student import Student  # noqa: E402
-from app.models.user import User  # noqa: E402
-from flask_jwt_extended import create_access_token  # noqa: E402
-from werkzeug.security import generate_password_hash  # noqa: E402
-from database import Base, db_session, engine  # noqa: E402
-from app import create_app  # noqa: E402
-import pytest
-
-
 @pytest.fixture(scope="session")
 def app():
+    from app import create_app
+
     app_instance = create_app()
     app_instance.config["TESTING"] = True
     app_instance.config["UPLOAD_FOLDER"] = "/tmp/test_uploads"
@@ -33,6 +24,8 @@ def client(app):
 
 @pytest.fixture(scope="function")
 def db(app):
+    from database import Base, db_session, engine
+
     with app.app_context():
         Base.metadata.create_all(bind=engine)
         yield db_session
@@ -42,6 +35,13 @@ def db(app):
 
 @pytest.fixture(scope="function")
 def seed_data(db, app):
+    from app.models.courses import Course
+    from app.models.instructor import Instructor
+    from app.models.student import Student
+    from app.models.user import User
+    from flask_jwt_extended import create_access_token
+    from werkzeug.security import generate_password_hash
+
     admin_user = User(
         username="admin_test",
         password=generate_password_hash("pwd"),
