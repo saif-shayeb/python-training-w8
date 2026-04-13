@@ -136,7 +136,7 @@ python-training-w8d1/
 
 ## Screenshots
 
-Current sample screenshot:
+<img width="1919" height="950" alt="image" src="https://github.com/user-attachments/assets/fa3e9822-f3ad-4820-b6d2-83791cacb1f1" />
 <img width="1915" height="966" alt="image" src="https://github.com/user-attachments/assets/5f2473f5-4c6c-4f0f-8b06-73f3ad250dc1" />
 <img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/6dc30d93-1f77-4a07-8e90-ccdceda39c8b" />
 <img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/d3a954a3-7b7b-43f3-b166-9ec09d05a893" />
@@ -145,12 +145,6 @@ Current sample screenshot:
 <img width="1919" height="920" alt="image" src="https://github.com/user-attachments/assets/c61e1bd1-89a1-4882-8d50-22a0c83a943f" />
 
 
-Recommended additions:
-
-- Login page screenshot
-- Admin dashboard screenshot
-- Student dashboard screenshot
-- Instructor courses screenshot
 
 ## API Reference
 
@@ -228,4 +222,4 @@ Used on list endpoints:
 ## Deployment Link
 
 - Current local deployment: http://127.0.0.1:5000
-- Production deployment: add your hosted URL here (https://python-training-w8.onrender.com)
+- Production deployment:  (https://python-training-w8.onrender.com)
