@@ -1,231 +1,226 @@
 # EduSpace Student Management Dashboard Pro
 
-A Flask + SQLAlchemy student management system with:
+Flask + SQLAlchemy web application for managing students, instructors, courses, and enrollments with role-based authentication and both API and dashboard UI experiences.
 
-- Role-based JWT authentication (admin, instructor, student)
-- Many-to-many student-course enrollment API
-- Profile picture upload
-- Search and pagination across listing endpoints
-- Admin, instructor, and student dashboard pages (Jinja + Bootstrap)
-- Automated tests with pytest
+## Project Overview
 
-This project uses a modular blueprint-based architecture and is designed as a Week 9 capstone expansion.
+EduSpace is a role-based student management platform that supports three user types:
 
-## Highlights
+- Admin: full management of students, instructors, courses, enrollments, and pending-user approvals.
+- Instructor: profile and assigned-course access.
+- Student: profile access, course catalog browsing, and self-enrollment actions.
 
-- Application factory pattern with blueprints
-- Relational model design with cascade-aware foreign keys
-- Enrollment uniqueness enforced at database level
-- Student deletion removes linked user account
-- Custom 404 and 500 error pages
-- CI workflow for lint + tests
+Core capabilities:
 
-## Tech Stack
+- JWT authentication and role authorization.
+- CRUD APIs for students, instructors, and courses.
+- Enrollment API with duplicate-enrollment protection.
+- Profile picture upload endpoint.
+- Dashboard routes for admin, instructor, and student UIs.
+- Seed script for repeatable local demo data.
+- Pytest test suite for API behavior.
 
-- Python 3.x
-- Flask
-- SQLAlchemy
-- Flask-JWT-Extended
-- SQLite
-- Jinja2 + Bootstrap + vanilla JavaScript
-- pytest + pytest-cov + flake8
+## Setup Instructions
 
-## Project Structure
+### 1. Prerequisites
 
-Top-level modules:
+- Python 3.10+
+- pip
 
-- app/: Flask app package (routes, models, templates, static)
-- tests/: API test suite
-- run.py: dev server entry point
-- seed.py: reset + seed script
-- database.py: engine/session/base setup
+### 2. Clone and enter project
 
-## Data Model
+```bash
+git clone <your-repo-url>
+cd python-training-w8d1
+```
 
-Core entities:
+### 3. Create and activate virtual environment
 
-- User
-  - Unique username and email
-  - Role: admin, instructor, student
-  - Active flag for approval workflow
-  - Optional profile picture URL
-- Student
-  - One-to-one with User
-  - GPA and many-to-many courses via Enrollment
-- Instructor
-  - One-to-one with User
-  - Major and one-to-many courses
-- Course
-  - Name, credits, instructor
-- Enrollment
-  - student_id + course_id unique pair
-  - Junction table between students and courses
+Windows (PowerShell):
 
-Important behavior:
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-- Student deletion removes the linked user account
-- Cascade behavior is enabled with SQLite foreign keys turned on
+macOS/Linux:
 
-## API Overview
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-Base API prefix: /api
+### 4. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Optional environment configuration
+
+Create a `.env` file in the project root (optional defaults already exist):
+
+```env
+JWT_SECRET_KEY=replace-with-a-long-random-secret
+SEED_DEFAULT_PASSWORD=password123
+```
+
+### 6. Seed the database
+
+This resets and recreates the SQLite schema, then inserts sample data.
+
+```bash
+python seed.py
+```
+
+### 7. Run the application
+
+```bash
+python run.py
+```
+
+Open: http://127.0.0.1:5000
+
+### 8. Run tests
+
+```bash
+python -m pytest -q
+```
+
+## Folder Structure
+
+```text
+python-training-w8d1/
+|-- app/
+|   |-- __init__.py
+|   |-- utils.py
+|   |-- models/
+|   |   |-- user.py
+|   |   |-- student.py
+|   |   |-- instructor.py
+|   |   |-- courses.py
+|   |   `-- enrollment.py
+|   |-- routes/
+|   |   |-- auth_routes.py
+|   |   |-- students_routes.py
+|   |   |-- instructors_routes.py
+|   |   |-- courses_routes.py
+|   |   |-- enrollment_routes.py
+|   |   |-- users_routes.py
+|   |   `-- web_routes.py
+|   |-- static/
+|   |   |-- app.js
+|   |   |-- styles.css
+|   |   `-- uploads/profile_pics/
+|   `-- templates/
+|       |-- admin/
+|       |-- instructor/
+|       |-- student/
+|       |-- public/
+|       |-- shared/
+|       `-- errors/
+|-- tests/
+|   |-- conftest.py
+|   |-- test_auth_api.py
+|   |-- test_students_api.py
+|   |-- test_instructors_enrollment_api.py
+|   |-- test_courses_api.py
+|   `-- test_users_api.py
+|-- config.py
+|-- database.py
+|-- run.py
+|-- seed.py
+|-- requirements.txt
+`-- README.md
+```
+
+## Screenshots
+
+Current sample screenshot:
+
+![Sample Application Screenshot](app/static/uploads/profile_pics/d0a4aac30b094e5d9e1b55a17342c511_Screenshot_2026-03-06_170133.png)
+
+Recommended additions:
+
+- Login page screenshot
+- Admin dashboard screenshot
+- Student dashboard screenshot
+- Instructor courses screenshot
+
+## API Reference
+
+Base API URL: `/api`
 
 Authentication:
 
-- POST /api/auth/register
-- POST /api/auth/login
+- JWT token required for protected endpoints.
+- Send token in header: `Authorization: Bearer <token>`
 
-Students:
+### Auth
 
-- GET /api/students
-  - Roles: admin, instructor
-  - Query params: q, page, per_page
-- GET /api/students/me
-  - Role: student
-- GET /api/students/<student_id>
-  - Roles: admin, student (self)
-- GET /api/students/<student_id>/courses
-  - Roles: admin, student (self)
-- POST /api/students
-  - Role: admin
-- PUT /api/students/<student_id>
-  - Roles: admin, student (self)
-- DELETE /api/students/<student_id>
-  - Role: admin
-  - Deletes student and associated user
+| Method | Endpoint           | Description                              | Auth   |
+| ------ | ------------------ | ---------------------------------------- | ------ |
+| POST   | /api/auth/register | Register user (student/admin/instructor) | Public |
+| POST   | /api/auth/login    | Login and receive JWT token              | Public |
 
-Instructors:
+### Students
 
-- GET /api/instructors
-  - Roles: admin, instructor, student
-  - Query params: q, page, per_page
-- GET /api/instructors/me
-  - Role: instructor
-- GET /api/instructors/me/courses
-  - Role: instructor
-  - Query params: q, page, per_page
-- GET /api/instructors/<instructor_id>
-  - Roles: admin, instructor, student
-- POST /api/instructors
-  - Role: admin
-- PUT /api/instructors/<instructor_id>
-  - Role: admin
-- DELETE /api/instructors/<instructor_id>
-  - Role: admin
+| Method | Endpoint                           | Description                         | Roles                 |
+| ------ | ---------------------------------- | ----------------------------------- | --------------------- |
+| GET    | /api/students                      | List students (search + pagination) | admin, instructor     |
+| GET    | /api/students/me                   | Get current student profile         | student               |
+| GET    | /api/students/{student_id}         | Get one student                     | admin, student (self) |
+| GET    | /api/students/{student_id}/courses | Get student courses                 | admin, student (self) |
+| POST   | /api/students                      | Create student                      | admin                 |
+| PUT    | /api/students/{student_id}         | Update student                      | admin, student (self) |
+| DELETE | /api/students/{student_id}         | Delete student and linked user      | admin                 |
 
-Courses:
+### Instructors
 
-- GET /api/courses
-  - Roles: admin, instructor, student
-  - Query params: q, page, per_page
-- GET /api/courses/<course_id>
-  - Roles: admin, instructor, student
-- POST /api/courses
-  - Role: admin
-- PUT /api/courses/<course_id>
-  - Role: admin
-- DELETE /api/courses/<course_id>
-  - Role: admin
+| Method | Endpoint                         | Description                                  | Roles                      |
+| ------ | -------------------------------- | -------------------------------------------- | -------------------------- |
+| GET    | /api/instructors                 | List instructors (search + pagination)       | admin, student, instructor |
+| GET    | /api/instructors/me              | Get current instructor profile               | instructor                 |
+| GET    | /api/instructors/me/courses      | Get instructor courses (search + pagination) | instructor                 |
+| GET    | /api/instructors/{instructor_id} | Get one instructor                           | admin, student, instructor |
+| POST   | /api/instructors                 | Create instructor                            | admin                      |
+| PUT    | /api/instructors/{instructor_id} | Update instructor                            | admin                      |
+| DELETE | /api/instructors/{instructor_id} | Delete instructor                            | admin                      |
 
-Enrollments:
+### Courses
 
-- POST /api/enrollments
-  - Roles: admin, student
-  - Admin payload includes student_id and course_id
-  - Student payload includes course_id
-- DELETE /api/enrollments/<student_id>/<course_id>
-  - Roles: admin, student (self)
+| Method | Endpoint                 | Description                        | Roles                      |
+| ------ | ------------------------ | ---------------------------------- | -------------------------- |
+| GET    | /api/courses             | List courses (search + pagination) | admin, student, instructor |
+| GET    | /api/courses/{course_id} | Get one course                     | admin, student, instructor |
+| POST   | /api/courses             | Create course                      | admin                      |
+| PUT    | /api/courses/{course_id} | Update course                      | admin                      |
+| DELETE | /api/courses/{course_id} | Delete course                      | admin                      |
 
-Users:
+### Enrollments
 
-- POST /api/users/profile_pic
-  - JWT required
-  - Multipart form upload (image file)
-- GET /api/users/pending
-  - Role: admin
-- POST or PUT /api/users/<user_id>/approve
-  - Role: admin
+| Method | Endpoint                                  | Description              | Roles                 |
+| ------ | ----------------------------------------- | ------------------------ | --------------------- |
+| POST   | /api/enrollments                          | Enroll student in course | admin, student        |
+| DELETE | /api/enrollments/{student_id}/{course_id} | Drop enrollment          | admin, student (self) |
 
-## Setup
+### Users
 
-1. Clone and enter the repository
+| Method   | Endpoint                     | Description                               | Roles                  |
+| -------- | ---------------------------- | ----------------------------------------- | ---------------------- |
+| POST     | /api/users/profile_pic       | Upload profile picture (multipart `file`) | any authenticated user |
+| GET      | /api/users/pending           | List inactive users                       | admin                  |
+| POST/PUT | /api/users/{user_id}/approve | Approve user account                      | admin                  |
 
-   git clone <your-repo-url>
-   cd python-training-w8d1
+### Query Parameters
 
-2. Create and activate virtual environment
+Used on list endpoints:
 
-   Windows:
-   python -m venv .venv
-   .venv\Scripts\activate
+- `q`: case-insensitive search text
+- `page`: page number (must be >= 1)
+- `per_page`: items per page (must be >= 1)
 
-   Mac/Linux:
-   python3 -m venv .venv
-   source .venv/bin/activate
+## Deployment Link
 
-3. Install dependencies
-
-   pip install -r requirements.txt
-
-4. Seed database (resets app.db)
-
-   python seed.py
-
-5. Run app
-
-   python run.py
-
-App URL: http://127.0.0.1:5000
-
-## Seed Data Notes
-
-- The seed script recreates the schema and inserts sample users/courses.
-- Default seeded password is controlled by environment variable:
-  - SEED_DEFAULT_PASSWORD (default: password123)
-
-## Testing
-
-Run all tests:
-
-python -m pytest -q
-
-Run with coverage:
-
-python -m pytest --cov=app --cov-report=term-missing
-
-Run lint:
-
-python -m flake8 app tests
-
-## CI
-
-GitHub Actions workflow runs lint and tests on pushes/PRs for main and dev.
-
-## Pagination and Validation Rules
-
-- page and per_page must be >= 1 on paginated endpoints.
-- Invalid pagination inputs return 400.
-
-## Error Handling
-
-- JSON error responses for API route exceptions
-- Custom templates for web 404 and 500 pages
-
-## Troubleshooting
-
-If pytest reports ModuleNotFoundError: No module named app:
-
-- Run tests from project root
-- Use the workspace venv interpreter explicitly:
-  d:/training/python-training-w8d1/.venv/Scripts/python.exe -m pytest -q
-
-If login fails for seeded users:
-
-- Rerun seeding: python seed.py
-- Ensure you are using the correct seed password (SEED_DEFAULT_PASSWORD)
-
-## Current Status
-
-- Tests passing locally
-- Role-based workflows functional for admin, instructor, and student
-- Core Week 9 backend features implemented
+- Current local deployment: http://127.0.0.1:5000
+- Production deployment: add your hosted URL here (https://python-training-w8.onrender.com)

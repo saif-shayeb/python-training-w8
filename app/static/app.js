@@ -2,19 +2,32 @@
 const Api = {
   async fetch(endpoint, options = {}) {
     const token = localStorage.getItem("jwt_token");
-    const headers = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const headers = { ...(options.headers || {}) };
+    if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+    if (token && !headers["Authorization"]) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
 
     try {
       const response = await fetch("/api" + endpoint, { ...options, headers });
-      const data = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await response.json()
+        : { description: await response.text() };
 
       if (!response.ok) {
-        // If token expired, clear and redirect
-        if (response.status === 401 && endpoint !== "/auth/login") {
+        // If auth fails (expired/invalid token), clear and redirect.
+        if (
+          (response.status === 401 || response.status === 422) &&
+          endpoint !== "/auth/login"
+        ) {
           Auth.logout();
         }
-        throw new Error(data.description || data.error || "Server Error");
+        throw new Error(
+          data.description || data.msg || data.error || "Server Error",
+        );
       }
       return data;
     } catch (e) {
@@ -256,14 +269,19 @@ async function uploadProfilePic() {
   const file = input.files[0];
   if (!file) return;
 
+  const token = localStorage.getItem("jwt_token");
+  if (!token || token === "null" || token === "undefined") {
+    UI.toast("Session expired. Please sign in again.", "error");
+    Auth.logout();
+    return;
+  }
+
   const btn = document.getElementById("upload-pic-btn");
   btn.disabled = true;
   btn.innerText = "Uploading...";
 
   const formData = new FormData();
   formData.append("file", file);
-
-  const token = localStorage.getItem("jwt_token");
 
   try {
     const response = await fetch("/api/users/profile_pic", {
@@ -273,7 +291,14 @@ async function uploadProfilePic() {
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.description || "Upload failed");
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 422) {
+        UI.toast("Session expired. Please sign in again.", "error");
+        Auth.logout();
+        return;
+      }
+      throw new Error(data.description || data.msg || "Upload failed");
+    }
 
     Auth.updateAvatarUI(data.profile_pic_url);
     UI.toast("Profile picture updated!");

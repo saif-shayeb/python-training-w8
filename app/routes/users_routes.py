@@ -19,7 +19,11 @@ def allowed_file(filename):
 @user_bp.route("/profile_pic", methods=["POST"])
 @jwt_required()
 def upload_profile_pic():
-    user_id = get_jwt_identity()
+    try:
+        user_id = int(get_jwt_identity())
+    except (TypeError, ValueError):
+        abort(401, description="Invalid authentication identity")
+
     user = db_session.get(User, user_id)
     if not user:
         abort(404, description="User not found")
