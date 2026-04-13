@@ -137,8 +137,13 @@ python-training-w8d1/
 ## Screenshots
 
 Current sample screenshot:
+<img width="1915" height="966" alt="image" src="https://github.com/user-attachments/assets/5f2473f5-4c6c-4f0f-8b06-73f3ad250dc1" />
+<img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/6dc30d93-1f77-4a07-8e90-ccdceda39c8b" />
+<img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/d3a954a3-7b7b-43f3-b166-9ec09d05a893" />
+<img width="1919" height="966" alt="image" src="https://github.com/user-attachments/assets/67d13b73-3cee-43b1-8706-3a0ec4b13b60" />
+<img width="1892" height="954" alt="image" src="https://github.com/user-attachments/assets/ef987fe6-2d0a-42ca-bd2e-5bc32fff13cc" />
+<img width="1919" height="920" alt="image" src="https://github.com/user-attachments/assets/c61e1bd1-89a1-4882-8d50-22a0c83a943f" />
 
-![Sample Application Screenshot](app/static/uploads/profile_pics/d0a4aac30b094e5d9e1b55a17342c511_Screenshot_2026-03-06_170133.png)
 
 Recommended additions:
 
